@@ -1,0 +1,72 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+out/
+
+# Rider
+.idea/
+
+# ASP.NET Temporary files
+appsettings*.Local.json
+appsettings*.Secrets.json
+
+# EF Core Migrations
+Migrations/
+
+# npm / Angular
+node_modules/
+dist/
+dist-*/
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Angular build / VS Code
+.angular/
+.angular/cache
+
+# Logs
+logs/
+*.log
+
+# Docker
+docker-compose.override.yml
+
+# Secrets
+*.pem
+*.pfx
+secrets.json
+
+# JetBrains Rider
+.idea/
+
+# Misc
+*.swp
+*.swo
+Thumbs.db
+*.env
+.env.local
+
+# VS publish
+publish/
+*.Publish.xml
+
+# LocalDB, SQLite, DB files you don't want committed
+*.mdf
+*.ldf
+*.sqlite
+*.db
+
+# Visual Studio Code
+.vscode/
+
+# Linux/Mac
+*.pid

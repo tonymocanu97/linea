@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Linea.Application/Linea.Application.csproj" />
+  <Project Path="Linea.Domain/Linea.Domain.csproj" />
+  <Project Path="Linea.Infrastructure/Linea.Infrastructure.csproj" />
+  <Project Path="Linea.Api/Linea.Api.csproj" />
+</Solution>
