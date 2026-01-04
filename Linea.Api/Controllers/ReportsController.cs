@@ -1,8 +1,7 @@
-﻿using Linea.Domain.Entities;
+﻿using Linea.Application.DTOs;
+using Linea.Application.Interfaces;
 using Linea.Domain.Enums;
-using Linea.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Linea.Api.Controllers
 {
@@ -10,47 +9,68 @@ namespace Linea.Api.Controllers
     [Route("api/[controller]")]
     public class ReportsController : ControllerBase
     {
-        private readonly LineaDbContext _db;
+        private readonly IReportService _service;
 
-        public ReportsController(LineaDbContext db) => _db = db;
+        public ReportsController(IReportService service) => _service = service;
 
-        [HttpPost("seed")]
-        public async Task<IActionResult> Seed()
+        [HttpPost]
+        public async Task<ActionResult<ReportDto>> Create([FromBody] CreateReportRequest request, CancellationToken cancellationToken)
         {
-            var report = new ProductionReport
+            try
             {
-                Date = DateOnly.FromDateTime(DateTime.UtcNow),
-                Shift = ShiftType.Shift1,
-                LineName = "Linea A",
-                GoodCount = 1200,
-                ScrapCount = 23,
-                Notes = "First seeded report"
-            };
-
-            report.Defects.Add(new Defect { Type = "Scratch", Quantity = 10 });
-            report.Downtimes.Add(new Downtime
+                var created = await _service.CreateAsync(request, cancellationToken);
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            }
+            catch (ArgumentException ex)
             {
-                StartTime = DateTime.UtcNow.AddMinutes(-30),
-                EndTime = DateTime.UtcNow.AddMinutes(-10),
-                Reason = "Material change"
-            });
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { error = ex.Message });
+            }
+        }
 
-            _db.ProductionReports.Add(report);
-            await _db.SaveChangesAsync();
-
-            return Ok(new { report.Id });
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<ReportDto>> GetById(Guid id, CancellationToken cancellationToken)
+        {
+            var report = await _service.GetByIdAsync(id, cancellationToken);
+            return report is null ? NotFound() : Ok(report);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IReadOnlyList<ReportDto>>> Get([FromQuery] DateOnly? date, [FromQuery] ShiftType shift, [FromQuery] string? lineName, CancellationToken cancellationToken)
         {
-            var data = await _db.ProductionReports
-                .Include(x => x.Defects)
-                .Include(x => x.Downtimes)
-                .OrderByDescending(x => x.Date)
-                .ToListAsync();
+            var list = await _service.GetAsync(date, shift, lineName, cancellationToken);
+            return Ok(list);
+        }
 
-            return Ok(data);
+        [HttpPost("{id:guid}/defects")]
+        public async Task<ActionResult<ReportDto>> AddDefect(Guid id, [FromBody] AddDefectRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var updated = await _service.AddDefectAsync(id, request, cancellationToken);
+                return updated is null ? NotFound() : Ok(updated);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpPost("{id:guid}/downtimes")]
+        public async Task<ActionResult<ReportDto>> AddDowntime(Guid id, [FromBody] AddDowntimeRequest request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var updated = await _service.AddDowntimeAsync(id, request, cancellationToken);
+                return updated is null ? NotFound() : Ok(updated);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }

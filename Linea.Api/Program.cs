@@ -1,4 +1,6 @@
+using Linea.Application.Interfaces;
 using Linea.Infrastructure.Persistence;
+using Linea.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -17,6 +19,8 @@ builder.Services.AddDbContext<LineaDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("LineaDb"));
 });
+
+builder.Services.AddScoped<IReportService, ReportService>();
 
 var app = builder.Build();
 
