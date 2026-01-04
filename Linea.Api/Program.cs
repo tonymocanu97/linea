@@ -23,6 +23,11 @@ builder.Services.AddDbContext<LineaDbContext>(options =>
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IDashboardservice, DashboardService>();
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddHostedService<TelemetrySimulatorService>();
+}
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
