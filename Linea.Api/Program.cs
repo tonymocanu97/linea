@@ -21,6 +21,7 @@ builder.Services.AddDbContext<LineaDbContext>(options =>
 });
 
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<IDashboardservice, DashboardService>();
 
 var app = builder.Build();
 
