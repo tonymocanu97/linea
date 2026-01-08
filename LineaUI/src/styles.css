@@ -44,10 +44,6 @@
 
   --font-family-sans: 'Inter', system-ui, sans-serif;
   --font-family-mono: 'JetBrains Mono', monospace;
-
-  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-float: float 3s ease-in-out infinite;
-  --animate-scan: scan 2s linear infinite;
 }
 
 @layer base {
@@ -146,39 +142,6 @@
 }
 
 @layer utilities {
-  .animate-pulse-slow {
-    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
-
-  .animate-scan {
-    animation: scan 2s linear infinite;
-  }
-
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-5px);
-    }
-  }
-
-  @keyframes scan {
-    0% {
-      transform: translateY(-100%);
-    }
-    100% {
-      transform: translateY(100%);
-    }
-  }
-}
-
-@layer utilities {
   .text-primary {
     color: hsl(var(--color-primary));
   }
@@ -265,5 +228,29 @@
 
   .border-border {
     border-color: hsl(var(--color-border));
+  }
+
+  .stroke-primary {
+    stroke: hsl(var(--color-primary));
+  }
+
+  .stroke-success {
+    stroke: hsl(var(--color-success));
+  }
+
+  .stroke-warning {
+    stroke: hsl(var(--color-warning));
+  }
+
+  .stroke-destructive {
+    stroke: hsl(var(--color-destructive));
+  }
+
+  .stroke-foreground {
+    stroke: hsl(var(--color-foreground));
+  }
+
+  .stroke-muted-foreground {
+    stroke: hsl(var(--color-muted-foreground));
   }
 }

@@ -2,11 +2,105 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '@components/header/header.component';
+import { OeeGaugeComponent } from '@components/oee-gauge/oee-gauge.component';
+import { forkJoin } from 'rxjs';
+import { DashboardApiService } from '../../core/dashboard-api.service';
+import { DashboardSummary } from '../../core/models';
+
+function toDateOnlyString(d: Date): string {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function daysInclusive(fromDateOnly: string, toDateOnly: string): number {
+  const from = new Date(fromDateOnly);
+  const to = new Date(toDateOnly);
+  const diffMs = to.getTime() - from.getTime();
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+  return Math.max(1, days);
+}
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, OeeGaugeComponent],
   templateUrl: './dashboard.component.html',
 })
-export class DashboardComponent {}
+export class DashboardComponent {
+  from = toDateOnlyString(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000));
+  to = toDateOnlyString(new Date());
+
+  summary?: DashboardSummary;
+
+  loading = false;
+  error?: string;
+
+  metrics = {
+    availability: 0,
+    performance: 0,
+    quality: 0,
+    oee: 0,
+  };
+
+  private readonly targetUnitsPerDay = 2000;
+  private readonly plannedMinutesPerDay = 24 * 60;
+
+  constructor(private api: DashboardApiService) {
+    this.refresh();
+  }
+
+  refresh(): void {
+    this.loading = true;
+    this.error = undefined;
+
+    forkJoin({
+      summary: this.api.getSummary(this.from, this.to),
+    }).subscribe({
+      next: (res) => {
+        this.summary = res.summary;
+
+        this.metrics = this.computeOeeMetrics(res.summary);
+
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err?.error?.error ?? err?.message ?? 'Failed to load dashboard.';
+        this.loading = false;
+      },
+    });
+  }
+
+  private computeOeeMetrics(s: DashboardSummary) {
+    const totalGood = s.totalGood ?? 0;
+    const totalScrap = s.totalScrap ?? 0;
+    const totalProduced = totalGood + totalScrap;
+
+    const quality = totalProduced === 0 ? 0 : (totalGood * 100) / totalProduced;
+
+    const days = daysInclusive(s.from, s.to);
+    const plannedMinutes = days * this.plannedMinutesPerDay;
+    const downtime = s.totalDowntimeMinutes ?? 0;
+    const availability =
+      plannedMinutes <= 0 ? 0 : ((plannedMinutes - downtime) * 100) / plannedMinutes;
+
+    const target = days * this.targetUnitsPerDay;
+    const performance = target <= 0 ? 0 : Math.min(100, (totalProduced * 100) / target);
+
+    const oee = (availability / 100) * (performance / 100) * (quality / 100) * 100;
+
+    return {
+      availability: this.clampAndRound(availability),
+      performance: this.clampAndRound(performance),
+      quality: this.clampAndRound(quality),
+      oee: this.clampAndRound(oee),
+    };
+  }
+
+  private clampAndRound(v: number): number {
+    const n = Number(v);
+    if (Number.isNaN(n)) return 0;
+    return Math.round(Math.max(0, Math.min(100, n)));
+  }
+}
