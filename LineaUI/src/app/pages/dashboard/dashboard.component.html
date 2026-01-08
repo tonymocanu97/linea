@@ -1,56 +1,14 @@
-<div style="max-width: 1000px; margin: 24px auto; font-family: Arial, sans-serif">
-  <h2>Linea Dashboard</h2>
+<div class="flex min-h-screen bg-background">
+  <main class="ml-64 flex-1">
+    <app-header></app-header>
 
-  <div stype="display: flex; gap: 12px; align-items: end; margin-bottom: 16px;">
-    <div>
-      <label>From</label><br />
-      <input type="date" [(ngModel)]="from" />
-    </div>
-    <div>
-      <label>To</label><br />
-      <input type="date" [(ngModel)]="to" />
-    </div>
-    <button (click)="refresh()" style="height: 34px">Refresh</button>
-  </div>
-
-  <div *ngIf="loading">Loading...</div>
-  <div *ngIf="error" style="color: #b00020">{{ error }}</div>
-
-  <ng-container *ngIf="summary">
-    <h3>Summary</h3>
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px">
-      <div style="padding: 12px; border: 1px solid #ddd; border-radius: 8px">
-        <div>Total Good</div>
-        <b>{{ summary.totalGood }}</b>
-      </div>
-      <div style="padding: 12px; border: 1px solid #ddd; border-radius: 8px">
-        <div>Total Scrap</div>
-        <b>{{ summary.totalScrap }}</b>
-      </div>
-      <div style="padding: 12px; border: 1px solid #ddd; border-radius: 8px">
-        <div>Scrap Rate</div>
-        <b>{{ summary.scrapRatePercent }}%</b>
-      </div>
-      <div style="padding: 12px; border: 1px solid #ddd; border-radius: 8px">
-        <div>Downtime</div>
-        <b>{{ summary.totalDowntimeMinutes }} min</b>
+    <div class="p-6">
+      <div class="mb-6 animate-fade-in">
+        <h2 class="text-2xl font-bold text-foreground">
+          Good morning, <span class="text-primary">Operator</span>
+        </h2>
+        <p class="text-muted-foreground">Here's your production overview for today</p>
       </div>
     </div>
-
-    <h3 style="margin-top: 20px">Top Defects</h3>
-    <table style="width: 100%; border-collapse: collapse">
-      <thead>
-        <tr style="text-align: left">
-          <th style="border-bottom: 1px solid #ddd; padding: 8px">Type</th>
-          <th style="border-bottom: 1px solid #ddd; padding: 8px">Quantity</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let d of summary.topDefects">
-          <td style="border-bottom: 1px solid #eee; padding: 8px">{{ d.type }}</td>
-          <td style="border-bottom: 1px solid #eee; padding: 8px">{{ d.quantity }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </ng-container>
+  </main>
 </div>

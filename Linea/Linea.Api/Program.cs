@@ -25,7 +25,7 @@ builder.Services.AddScoped<IDashboardservice, DashboardService>();
 
 if (builder.Environment.IsDevelopment())
 {
-    builder.Services.AddHostedService<TelemetrySimulatorService>();
+    //builder.Services.AddHostedService<TelemetrySimulatorService>();
 }
 
 var app = builder.Build();
