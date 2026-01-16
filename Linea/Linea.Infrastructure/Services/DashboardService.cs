@@ -22,7 +22,7 @@ namespace Linea.Infrastructure.Services
             }
 
             var query = _database.ProductionReports.AsNoTracking().AsQueryable();
-            query = query.Where(r => r.Date >= from && r.Date <= to);
+            query = query.Where(r => r.Date >= from.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc) && r.Date <= to.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc));
 
             if (!string.IsNullOrWhiteSpace(lineName))
             {

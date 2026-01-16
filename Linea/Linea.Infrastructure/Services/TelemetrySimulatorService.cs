@@ -56,7 +56,7 @@ namespace Linea.Infrastructure.Services
             using var scope = _scopeFactory.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<LineaDbContext>();
 
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var today = DateTime.UtcNow;
             var shift = GetCurrentShiftUtc(DateTime.UtcNow);
 
             foreach (var lineName in Lines)

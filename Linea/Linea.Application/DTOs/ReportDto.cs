@@ -15,6 +15,7 @@ namespace Linea.Application.DTOs
         Guid Id,
         DateTime StartTime,
         DateTime EndTime,
+        string Type,
         string Reason,
         int Duration
     );
@@ -22,9 +23,10 @@ namespace Linea.Application.DTOs
     public sealed record ReportDto
     (
         Guid Id,
-        DateOnly Date,
+        DateTime Date,
         ShiftType Shift,
         string LineName,
+        string EquipmentName,
         int GoodCount,
         int ScrapCount,
         string? Notes,

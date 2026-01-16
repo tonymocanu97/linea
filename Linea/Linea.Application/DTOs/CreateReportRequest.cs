@@ -4,9 +4,10 @@ namespace Linea.Application.DTOs
 {
     public sealed record CreateReportRequest
     (
-        DateOnly Date,
+        DateTime Date,
         ShiftType Shift,
         string LineName,
+        string EquipmentName,
         int GoodCount,
         int ScrapCount,
         string? Notes

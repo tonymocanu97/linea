@@ -23,7 +23,8 @@ namespace Linea.Infrastructure.Services
             var exists = await _database.ProductionReports.AnyAsync(x =>
                 x.Date == request.Date &&
                 x.Shift == request.Shift &&
-                x.LineName == request.LineName, cancellationToken);
+                x.LineName == request.LineName &&
+                x.EquipmentName == request.EquipmentName, cancellationToken);
 
             if (exists)
                 throw new InvalidOperationException("A report for this date/shift/line already exists.");
@@ -33,6 +34,7 @@ namespace Linea.Infrastructure.Services
                 Date = request.Date,
                 Shift = request.Shift,
                 LineName = request.LineName.Trim(),
+                EquipmentName = request.EquipmentName.Trim(),
                 GoodCount = request.GoodCount,
                 ScrapCount = request.ScrapCount,
                 Notes = request.Notes
@@ -58,9 +60,10 @@ namespace Linea.Infrastructure.Services
         }
 
         public async Task<IReadOnlyList<ReportDto>> GetAsync(
-        DateOnly? date,
+        DateTime? date,
         ShiftType? shift,
         string? lineName,
+        string? equipmentName,
         CancellationToken cancellationToken = default)
         {
             var q = _database.ProductionReports
@@ -78,10 +81,14 @@ namespace Linea.Infrastructure.Services
             if (!string.IsNullOrWhiteSpace(lineName))
                 q = q.Where(x => x.LineName == lineName.Trim());
 
+            if (!string.IsNullOrWhiteSpace(equipmentName))
+                q = q.Where(x => x.EquipmentName == equipmentName.Trim());
+
             var list = await q
                 .OrderByDescending(x => x.Date)
                 .ThenByDescending(x => x.Shift)
                 .ThenBy(x => x.LineName)
+                .ThenBy(x => x.EquipmentName)
                 .ToListAsync(cancellationToken);
 
             return list.Select(Map).ToList();
@@ -126,6 +133,7 @@ namespace Linea.Infrastructure.Services
                 ProductionReportId = reportId,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
+                Type = request.Type.Trim(),
                 Reason = request.Reason.Trim()
             });
 
@@ -137,6 +145,9 @@ namespace Linea.Infrastructure.Services
         {
             if (string.IsNullOrWhiteSpace(request.LineName))
                 throw new ArgumentException("LineName is required.");
+
+            if (string.IsNullOrWhiteSpace(request.EquipmentName))
+                throw new ArgumentException("EquipmentName is required.");
 
             if (request.GoodCount < 0 || request.ScrapCount < 0)
                 throw new ArgumentException("GoodCount/ScrapCount must be >= 0.");
@@ -152,6 +163,8 @@ namespace Linea.Infrastructure.Services
 
         private void ValidateDowntime(AddDowntimeRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.Type))
+                throw new ArgumentException("Type is required.");
             if (string.IsNullOrWhiteSpace(request.Reason))
                 throw new ArgumentException("Reason is required.");
             if (request.EndTime <= request.StartTime)
@@ -169,6 +182,7 @@ namespace Linea.Infrastructure.Services
                     d.Id,
                     d.StartTime,
                     d.EndTime,
+                    d.Type,
                     d.Reason,
                     (int)Math.Max(0, (d.EndTime - d.StartTime).TotalMinutes)))
                 .ToList();
@@ -178,6 +192,7 @@ namespace Linea.Infrastructure.Services
                 report.Date,
                 report.Shift,
                 report.LineName,
+                report.EquipmentName,
                 report.GoodCount,
                 report.ScrapCount,
                 report.Notes,

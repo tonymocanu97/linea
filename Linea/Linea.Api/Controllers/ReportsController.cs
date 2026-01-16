@@ -39,9 +39,9 @@ namespace Linea.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<ReportDto>>> Get([FromQuery] DateOnly? date, [FromQuery] ShiftType shift, [FromQuery] string? lineName, CancellationToken cancellationToken)
+        public async Task<ActionResult<IReadOnlyList<ReportDto>>> Get([FromQuery] DateTime? date, [FromQuery] ShiftType shift, [FromQuery] string? lineName, [FromQuery] string? equipment, CancellationToken cancellationToken)
         {
-            var list = await _service.GetAsync(date, shift, lineName, cancellationToken);
+            var list = await _service.GetAsync(date, shift, lineName, equipment, cancellationToken);
             return Ok(list);
         }
 

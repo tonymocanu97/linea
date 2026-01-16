@@ -6,10 +6,11 @@ namespace Linea.Domain.Entities
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public DateOnly Date { get; set; }
+        public DateTime Date { get; set; }
         public ShiftType Shift { get; set; }
 
         public string LineName { get; set; } = string.Empty;
+        public string EquipmentName { get; set; } = string.Empty;
 
         public int GoodCount { get; set; }
         public int ScrapCount { get; set; }

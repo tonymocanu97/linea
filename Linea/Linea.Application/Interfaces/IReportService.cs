@@ -9,9 +9,10 @@ namespace Linea.Application.Interfaces
         Task<ReportDto?> GetByIdAsync (Guid id, CancellationToken ct = default);
 
         Task<IReadOnlyList<ReportDto>> GetAsync(
-            DateOnly? date,
+            DateTime? date,
             ShiftType? shift,
             string? lineName,
+            string? equipmentName,
             CancellationToken ct = default);
 
         Task<ReportDto?> AddDefectAsync(Guid reportId, AddDefectRequest request, CancellationToken ct = default);

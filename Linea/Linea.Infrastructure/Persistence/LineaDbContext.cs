@@ -21,9 +21,10 @@ namespace Linea.Infrastructure.Persistence
                 b.HasKey(x => x.Id);
 
                 b.Property(x => x.LineName).HasMaxLength(100);
+                b.Property(x => x.EquipmentName).HasMaxLength(100);
 
-                b.HasIndex(x => new { x.Date, x.Shift, x.LineName }).IsUnique();
-
+                b.HasIndex(x => new { x.Date, x.Shift, x.LineName, x.EquipmentName }).IsUnique();
+                
                 b.HasMany(x => x.Defects)
                     .WithOne(x => x.ProductionReport!)
                     .HasForeignKey(x => x.ProductionReportId)
@@ -49,6 +50,7 @@ namespace Linea.Infrastructure.Persistence
                 b.ToTable("downtimes");
                 b.HasKey(x => x.Id);
 
+                b.Property(x => x.Type).HasMaxLength(120);
                 b.Property(x => x.Reason).HasMaxLength(200);
 
                 b.Ignore(x => x.Duration);

@@ -6,6 +6,7 @@ namespace Linea.Application.DTOs
     (
         DateTime StartTime,
         DateTime EndTime,
+        string Type,
         string Reason
     );
 }
