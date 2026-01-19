@@ -25,6 +25,44 @@
           <app-oee-gauge [value]="metrics.quality" label="Quality" color="success" />
         </div>
       </div>
+
+      <div class="data-grid mb-6">
+        <app-metric-card
+          title="Total Output"
+          [value]="totalOutput"
+          unit="units"
+          [icon]="package"
+          status="success"
+        />
+        <app-metric-card
+          title="Good Units"
+          [value]="goodUnits"
+          unit="units"
+          [icon]="packageCheck"
+          status="success"
+        />
+        <app-metric-card
+          title="Scrap Units"
+          [value]="scrapUnits"
+          unit="units"
+          [icon]="packageMinus"
+          status="warning"
+        />
+        <app-metric-card
+          title="Total Downtime"
+          [value]="downtimeMinutes"
+          unit="minutes"
+          [icon]="timer"
+          status="warning"
+        />
+        <app-metric-card
+          title="Production Rate"
+          [value]="productionRatePerHour"
+          unit="units/hr"
+          [icon]="gauge"
+          status="success"
+        />
+      </div>
     </div>
   </main>
 </div>

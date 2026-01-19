@@ -2,10 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '@components/header/header.component';
+import { MetricCardComponent } from '@components/metric-card/metric-card.component';
 import { OeeGaugeComponent } from '@components/oee-gauge/oee-gauge.component';
+import { DashboardApiService } from '@core/dashboard-api.service';
+import { DashboardSummary } from '@core/models';
+import { Gauge, Package, PackageCheck, PackageMinus, TimerIcon } from 'lucide-angular';
 import { forkJoin } from 'rxjs';
-import { DashboardApiService } from '../../core/dashboard-api.service';
-import { DashboardSummary } from '../../core/models';
 
 function toDateOnlyString(d: Date): string {
   const yyyy = d.getFullYear();
@@ -25,12 +27,18 @@ function daysInclusive(fromDateOnly: string, toDateOnly: string): number {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, OeeGaugeComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, OeeGaugeComponent, MetricCardComponent],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
   from = toDateOnlyString(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000));
   to = toDateOnlyString(new Date());
+  
+  package = Package;
+  packageCheck = PackageCheck;
+  packageMinus = PackageMinus;
+  timer = TimerIcon;
+  gauge = Gauge;
 
   summary?: DashboardSummary;
 
@@ -46,6 +54,38 @@ export class DashboardComponent {
 
   private readonly targetUnitsPerDay = 2000;
   private readonly plannedMinutesPerDay = 24 * 60;
+
+  get totalOutput(): number {
+    return (this.summary?.totalGood ?? 0) + (this.summary?.totalScrap ?? 0);
+  }
+
+  get goodUnits(): number {
+    return this.summary?.totalGood ?? 0;
+  }
+
+  get scrapUnits(): number {
+    return this.summary?.totalScrap ?? 0;
+  }
+
+  get downtimeMinutes(): number {
+    return this.summary?.totalDowntimeMinutes ?? 0;
+  }
+
+  get productionRatePerHour(): number {
+    if (!this.summary) return 0;
+
+    const totalGood = this.summary.totalGood ?? 0;
+    const totalScrap = this.summary.totalScrap ?? 0;
+    const totalProduced = totalGood + totalScrap;
+
+    const days = daysInclusive(this.summary.from, this.summary.to);
+    const plannedMinutes = days * this.plannedMinutesPerDay;
+
+    if (plannedMinutes <= 0) return 0;
+    const ratePerHour = (totalProduced / plannedMinutes) * 60;
+
+    return Math.round(ratePerHour);
+  }
 
   constructor(private api: DashboardApiService) {
     this.refresh();
