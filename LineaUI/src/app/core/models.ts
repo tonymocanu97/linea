@@ -13,3 +13,20 @@ export interface DashboardSummary {
   totalDowntimeMinutes: number;
   topDefects: TopDefect[];
 }
+
+export interface HourlyProductionPoint {
+  hour: number;
+  production: number;
+  target: number;
+}
+
+export interface Downtime {
+  id: string;
+  startTime: string;
+  endTime: string;
+  type: string;
+  reason: string;
+  lineName: string;
+  equipmentName: string;
+  duration: number;
+}

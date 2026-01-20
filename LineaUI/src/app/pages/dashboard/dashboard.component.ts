@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { AlertsListComponent } from '@components/alerts-list/alerts-list.component';
 import { HeaderComponent } from '@components/header/header.component';
 import { MetricCardComponent } from '@components/metric-card/metric-card.component';
 import { OeeGaugeComponent } from '@components/oee-gauge/oee-gauge.component';
+import { ProductionChartComponent } from '@components/production-chart/production-chart.component';
 import { DashboardApiService } from '@core/dashboard-api.service';
-import { DashboardSummary } from '@core/models';
+import { DashboardSummary, HourlyProductionPoint } from '@core/models';
 import { Gauge, Package, PackageCheck, PackageMinus, TimerIcon } from 'lucide-angular';
 import { forkJoin } from 'rxjs';
 
@@ -27,7 +29,7 @@ function daysInclusive(fromDateOnly: string, toDateOnly: string): number {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, OeeGaugeComponent, MetricCardComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, OeeGaugeComponent, MetricCardComponent, ProductionChartComponent, AlertsListComponent],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
@@ -44,6 +46,12 @@ export class DashboardComponent {
 
   loading = false;
   error?: string;
+
+  productionChartData: {
+    time: string;
+    production: number;
+    target: number;
+  }[] = [];
 
   metrics = {
     availability: 0,
@@ -97,12 +105,12 @@ export class DashboardComponent {
 
     forkJoin({
       summary: this.api.getSummary(this.from, this.to),
+      hourly: this.api.getHourlyProduction(this.from, this.to),
     }).subscribe({
       next: (res) => {
         this.summary = res.summary;
-
         this.metrics = this.computeOeeMetrics(res.summary);
-
+        this.productionChartData = this.buildProductionChartData(res.hourly);
         this.loading = false;
       },
       error: (err) => {
@@ -142,5 +150,19 @@ export class DashboardComponent {
     const n = Number(v);
     if (Number.isNaN(n)) return 0;
     return Math.round(Math.max(0, Math.min(100, n)));
+  }
+
+  private buildProductionChartData(hourly: HourlyProductionPoint[]) {
+    if (!hourly || hourly.length === 0) {
+      return [];
+    }
+
+    return hourly
+      .sort((a, b) => a.hour - b.hour)
+      .map(h => ({
+        time: `${String(h.hour).padStart(2, '0')}:00`,
+        production: h.production,
+        target: h.target,
+      }));
   }
 }

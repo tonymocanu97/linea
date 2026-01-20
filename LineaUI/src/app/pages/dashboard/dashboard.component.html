@@ -63,6 +63,14 @@
           status="success"
         />
       </div>
+
+      <div class="mb-6 grid gap-6 lg:grid-cols-3">
+        <div class="lg:col-span-2">
+          <app-production-chart [data]="productionChartData" />
+        </div>
+
+        <app-alerts-list />
+      </div>
     </div>
   </main>
 </div>
