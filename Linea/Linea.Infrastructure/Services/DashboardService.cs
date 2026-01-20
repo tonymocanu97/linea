@@ -1,6 +1,7 @@
 ﻿using Linea.Application.DTOs;
 using Linea.Application.DTOs.Dashboard;
 using Linea.Application.Interfaces;
+using Linea.Domain.Entities;
 using Linea.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
