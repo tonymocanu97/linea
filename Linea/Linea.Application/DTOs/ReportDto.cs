@@ -33,4 +33,16 @@ namespace Linea.Application.DTOs
         IReadOnlyList<DefectDto> Defects,
         IReadOnlyList<DowntimeDto> Downtimes
     );
+
+    public sealed record ActiveDowntimeDto
+    (
+        Guid Id,
+        DateTime StartTime,
+        DateTime EndTime,
+        string Type,
+        string Reason,
+        string LineName,
+        string EquipmentName,
+        int Duration
+    );
 }

@@ -1,4 +1,5 @@
-﻿using Linea.Application.DTOs.Dashboard;
+﻿using Linea.Application.DTOs;
+using Linea.Application.DTOs.Dashboard;
 using Linea.Application.Interfaces;
 using Linea.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -65,6 +66,59 @@ namespace Linea.Infrastructure.Services
                 TotalDowntime: totalDowntime,
                 TopDefects: topDefects
             );
+        }
+
+        public async Task<List<HourlyProductionPoint>> GetHourlyProduction(DateOnly from, DateOnly to, string? lineName = null, CancellationToken cancellationToken = default)
+        {
+            if (to < from)
+            {
+                throw new ArgumentException("'to' date must be greater than or equal to 'from' date.");
+            }
+
+            var query = _database.ProductionReports.AsNoTracking().AsQueryable();
+            query = query.Where(r => r.Date >= from.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc) && r.Date <= to.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc));
+
+            if (!string.IsNullOrWhiteSpace(lineName))
+            {
+                query = query.Where(r => r.LineName == lineName);
+            }
+
+            var reports = await query.ToListAsync();
+
+            var hourlyData = reports
+                .GroupBy(r => r.Date.Hour)
+                .Select(g => new HourlyProductionPoint
+                {
+                    Hour = g.Key,
+                    Production = g.Sum(r => r.GoodCount + r.ScrapCount),
+                    Target = 83
+                })
+                .OrderBy(h => h.Hour)
+                .ToList();
+
+            return hourlyData;
+        }
+
+        public async Task<List<ActiveDowntimeDto>> GetActiveDowntimes(string? lineName = null, CancellationToken cancellationToken = default)
+        {
+            var query = _database.Downtimes.AsNoTracking().AsQueryable();
+
+            var downtimes = await query
+                .OrderByDescending(d => d.StartTime)
+                .ToListAsync();
+
+            var result = downtimes.Select(d => new ActiveDowntimeDto(
+                Id: d.Id,
+                StartTime: d.StartTime,
+                EndTime: d.EndTime,
+                Type: d.Type,
+                Reason: d.Reason,
+                LineName: d.ProductionReport?.LineName ?? string.Empty,
+                EquipmentName: d.ProductionReport?.EquipmentName ?? string.Empty,
+                Duration: (int)Math.Max(0, (d.EndTime - d.StartTime).TotalMinutes)
+            )).ToList();
+
+            return result;
         }
     }
 }
