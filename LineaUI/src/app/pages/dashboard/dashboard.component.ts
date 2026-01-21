@@ -2,12 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AlertsListComponent } from '@components/alerts-list/alerts-list.component';
+import { EquipmentStatusComponent } from '@components/equipment-status/equipment-status.component';
 import { HeaderComponent } from '@components/header/header.component';
 import { MetricCardComponent } from '@components/metric-card/metric-card.component';
 import { OeeGaugeComponent } from '@components/oee-gauge/oee-gauge.component';
 import { ProductionChartComponent } from '@components/production-chart/production-chart.component';
 import { DashboardApiService } from '@core/dashboard-api.service';
-import { DashboardSummary, HourlyProductionPoint } from '@core/models';
+import { DashboardSummary, EquipmentStatus, HourlyProductionPoint } from '@core/models';
 import { Gauge, Package, PackageCheck, PackageMinus, TimerIcon } from 'lucide-angular';
 import { forkJoin } from 'rxjs';
 
@@ -29,7 +30,7 @@ function daysInclusive(fromDateOnly: string, toDateOnly: string): number {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, OeeGaugeComponent, MetricCardComponent, ProductionChartComponent, AlertsListComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, OeeGaugeComponent, MetricCardComponent, ProductionChartComponent, AlertsListComponent, EquipmentStatusComponent],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
@@ -59,6 +60,8 @@ export class DashboardComponent {
     quality: 0,
     oee: 0,
   };
+
+  equipmentStatusData: EquipmentStatus[] = [];
 
   private readonly targetUnitsPerDay = 2000;
   private readonly plannedMinutesPerDay = 24 * 60;
@@ -106,11 +109,13 @@ export class DashboardComponent {
     forkJoin({
       summary: this.api.getSummary(this.from, this.to),
       hourly: this.api.getHourlyProduction(this.from, this.to),
+      equipment: this.api.getEquipmentStatus(),
     }).subscribe({
       next: (res) => {
         this.summary = res.summary;
         this.metrics = this.computeOeeMetrics(res.summary);
         this.productionChartData = this.buildProductionChartData(res.hourly);
+        this.equipmentStatusData = res.equipment;
         this.loading = false;
       },
       error: (err) => {

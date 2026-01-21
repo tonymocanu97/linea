@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DashboardSummary, Downtime, HourlyProductionPoint } from './models';
+import { DashboardSummary, Downtime, EquipmentStatus, HourlyProductionPoint } from './models';
 
 @Injectable({
   providedIn: 'root',
@@ -37,5 +37,13 @@ export class DashboardApiService {
       params = params.set('lineName', lineName.trim());
     }
     return this.http.get<Downtime[]>(`${this.baseUrl}/active-downtimes`, { params });
+  }
+
+  getEquipmentStatus(lineName?: string): Observable<EquipmentStatus[]> {
+    let params = new HttpParams();
+    if (lineName && lineName.trim().length > 0) {
+      params = params.set('lineName', lineName.trim());
+    }
+    return this.http.get<EquipmentStatus[]>(`${this.baseUrl}/equipment-status`, { params });
   }
 }

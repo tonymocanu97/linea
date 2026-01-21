@@ -30,3 +30,12 @@ export interface Downtime {
   equipmentName: string;
   duration: number;
 }
+
+export interface EquipmentStatus {
+  id: string;
+  name: string;
+  status: 'running' | 'idle' | 'error' | 'maintenance';
+  actualProductionRate: number;
+  targetProductionRate: number;
+  efficiencyPercentage: number;
+}
