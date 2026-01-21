@@ -1,4 +1,4 @@
-﻿using Linea.Application.DTOs;
+using Linea.Application.DTOs;
 using Linea.Application.DTOs.Dashboard;
 using Linea.Application.Interfaces;
 using Linea.Domain.Entities;
@@ -102,7 +102,15 @@ namespace Linea.Infrastructure.Services
 
         public async Task<List<ActiveDowntimeDto>> GetActiveDowntimes(string? lineName = null, CancellationToken cancellationToken = default)
         {
-            var query = _database.Downtimes.AsNoTracking().AsQueryable();
+            var query = _database.Downtimes
+                .AsNoTracking()
+                .Include(d => d.ProductionReport)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(lineName))
+            {
+                query = query.Where(d => d.ProductionReport != null && d.ProductionReport.LineName == lineName);
+            }
 
             var downtimes = await query
                 .OrderByDescending(d => d.StartTime)
@@ -120,6 +128,81 @@ namespace Linea.Infrastructure.Services
             )).ToList();
 
             return result;
+        }
+
+        public async Task<List<EquipmentStatusDto>> GetEquipmentStatus(string? lineName = null, CancellationToken cancellationToken = default)
+        {
+            var query = _database.ProductionReports.AsNoTracking().AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(lineName))
+            {
+                query = query.Where(e => e.LineName == lineName);
+            }
+
+            var equipments = await query
+                .Include(e => e.Downtimes)
+                .ToListAsync(cancellationToken);
+
+            var result = equipments
+                .GroupBy(e => new { e.EquipmentName, e.LineName })
+                .Select(g =>
+                {
+                    var totalProduction = g.Sum(e => e.GoodCount + e.ScrapCount);
+                    var totalHours = g.Select(e => e.Date).Distinct().Count();
+                    var actualRate = totalHours > 0 ? totalProduction / totalHours : totalProduction;
+                    var targetRate = 83;
+                    
+                    var equipmentId = string.IsNullOrWhiteSpace(g.Key.EquipmentName) 
+                        ? Guid.NewGuid().ToString() 
+                        : g.Key.EquipmentName.Replace(" ", "-").ToUpperInvariant();
+                    
+                    return new EquipmentStatusDto(
+                        Id: equipmentId,
+                        Name: g.Key.EquipmentName,
+                        Status: DetermineStatus(g.ToList()),
+                        ActualProductionRate: actualRate,
+                        TargetProductionRate: targetRate,
+                        EfficiencyPercentage: CalculateEfficiency(actualRate, targetRate)
+                    );
+                })
+                .Where(e => !string.IsNullOrWhiteSpace(e.Name))
+                .ToList();
+
+            return result;
+        }
+
+        private static string DetermineStatus(List<ProductionReport> reports)
+        {
+            var hasActiveDowntime = reports.Any(r => 
+                r.Downtimes.Any(d => d.EndTime == DateTime.MinValue || 
+                               (DateTime.UtcNow - d.EndTime).TotalHours < 1));
+            
+            if (hasActiveDowntime)
+            {
+                var hasMaintenanceDowntime = reports.Any(r => 
+                    r.Downtimes.Any(d => d.Type.Contains("Maintenance", StringComparison.OrdinalIgnoreCase)));
+                
+                if (hasMaintenanceDowntime)
+                    return "maintenance";
+                
+                var hasBreakdown = reports.Any(r => 
+                    r.Downtimes.Any(d => d.Type.Contains("Breakdown", StringComparison.OrdinalIgnoreCase)));
+                
+                if (hasBreakdown)
+                    return "error";
+                
+                return "idle";
+            }
+            
+            var hasRecentProduction = reports.Any(r => 
+                (DateTime.UtcNow - r.Date).TotalHours < 24 && (r.GoodCount + r.ScrapCount) > 0);
+            
+            return hasRecentProduction ? "running" : "idle";
+        }
+
+        private static int CalculateEfficiency(int actualRate, int targetRate)
+        {
+            return targetRate == 0 ? 0 : (int)Math.Round((double)actualRate * 100.0 / targetRate);
         }
     }
 }

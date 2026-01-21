@@ -1,4 +1,4 @@
-﻿using Linea.Domain.Enums;
+using Linea.Domain.Enums;
 
 namespace Linea.Application.DTOs
 {
@@ -44,5 +44,15 @@ namespace Linea.Application.DTOs
         string LineName,
         string EquipmentName,
         int Duration
+    );
+
+    public sealed record EquipmentStatusDto 
+    (
+        string Id,
+        string Name,
+        string Status,
+        int ActualProductionRate,
+        int TargetProductionRate,
+        int EfficiencyPercentage
     );
 }

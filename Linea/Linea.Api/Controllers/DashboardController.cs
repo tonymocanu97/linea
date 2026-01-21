@@ -59,5 +59,19 @@ namespace Linea.Api.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+
+        [HttpGet("equipment-status")]
+        public async Task<ActionResult<List<EquipmentStatusDto>>> GetEquipmentStatus([FromQuery] string? lineName, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _dashboardService.GetEquipmentStatus(lineName, cancellationToken);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
     }
 }
