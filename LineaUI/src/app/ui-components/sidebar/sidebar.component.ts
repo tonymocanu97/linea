@@ -1,4 +1,4 @@
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import {
@@ -25,7 +25,7 @@ interface NavItem {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [RouterModule, NgFor, NgIf, NgClass, LucideAngularModule],
+  imports: [RouterModule, NgFor, NgIf, LucideAngularModule],
   templateUrl: './sidebar.component.html',
 })
 export class SidebarComponent {
@@ -42,7 +42,7 @@ export class SidebarComponent {
   overviewItems: NavItem[] = [
     { label: 'Dashboard', icon: this.layoutDashboard, route: '/dashboard' },
     { label: 'Real-time Monitor', icon: this.activity, comingSoon: true },
-    { label: 'Analytics', icon: this.barChart, comingSoon: true },
+    { label: 'Analytics', icon: this.barChart, route: '/analytics' },
   ];
 
   productionItems: NavItem[] = [
