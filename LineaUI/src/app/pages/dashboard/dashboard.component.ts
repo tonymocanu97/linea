@@ -7,6 +7,7 @@ import { HeaderComponent } from '@components/header/header.component';
 import { MetricCardComponent } from '@components/metric-card/metric-card.component';
 import { OeeGaugeComponent } from '@components/oee-gauge/oee-gauge.component';
 import { ProductionChartComponent } from '@components/production-chart/production-chart.component';
+import { SidebarComponent } from '@components/sidebar/sidebar.component';
 import { DashboardApiService } from '@core/dashboard-api.service';
 import { DashboardSummary, EquipmentStatus, HourlyProductionPoint } from '@core/models';
 import { Gauge, Package, PackageCheck, PackageMinus, TimerIcon } from 'lucide-angular';
@@ -30,7 +31,7 @@ function daysInclusive(fromDateOnly: string, toDateOnly: string): number {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, OeeGaugeComponent, MetricCardComponent, ProductionChartComponent, AlertsListComponent, EquipmentStatusComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, OeeGaugeComponent, MetricCardComponent, ProductionChartComponent, AlertsListComponent, EquipmentStatusComponent, SidebarComponent],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent {
