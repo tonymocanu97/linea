@@ -1,0 +1,80 @@
+<div class="flex min-h-screen bg-background">
+  <app-sidebar />
+
+  <main class="ml-64 flex-1">
+    <app-header />
+
+    <div class="p-6">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-foreground">
+          Good morning, <span class="text-primary">Operator</span>
+        </h2>
+        <p class="text-muted-foreground">Here's your production overview for today</p>
+      </div>
+
+      <div class="mb-6 rounded-xl border border-border bg-card p-6">
+        <div class="mb-4">
+          <h3 class="text-lg font-semibold text-foreground">
+            Overall Equipment Effectiveness (OEE)
+          </h3>
+          <p class="text-sm text-muted-foreground">Current production performance metrics</p>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-around gap-6">
+          <app-oee-gauge [value]="metrics.oee" label="Overall OEE" color="primary" />
+          <app-oee-gauge [value]="metrics.availability" label="Availability" color="success" />
+          <app-oee-gauge [value]="metrics.performance" label="Performance" color="warning" />
+          <app-oee-gauge [value]="metrics.quality" label="Quality" color="success" />
+        </div>
+      </div>
+
+      <div class="data-grid mb-6">
+        <app-metric-card
+          title="Total Output"
+          [value]="totalOutput"
+          unit="units"
+          [icon]="package"
+          status="success"
+        />
+        <app-metric-card
+          title="Good Units"
+          [value]="goodUnits"
+          unit="units"
+          [icon]="packageCheck"
+          status="success"
+        />
+        <app-metric-card
+          title="Scrap Units"
+          [value]="scrapUnits"
+          unit="units"
+          [icon]="packageMinus"
+          status="warning"
+        />
+        <app-metric-card
+          title="Total Downtime"
+          [value]="downtimeMinutes"
+          unit="minutes"
+          [icon]="timer"
+          status="warning"
+        />
+        <app-metric-card
+          title="Production Rate"
+          [value]="productionRatePerHour"
+          unit="units/hr"
+          [icon]="gauge"
+          status="success"
+        />
+      </div>
+
+      <div class="mb-6 grid gap-6 lg:grid-cols-3">
+        <div class="lg:col-span-2">
+          <app-production-chart [data]="productionChartData" />
+        </div>
+
+        <app-alerts-list />
+      </div>
+
+      <app-equipment-status [equipment]="equipmentStatusData" />
+    </div>
+  </main>
+</div>

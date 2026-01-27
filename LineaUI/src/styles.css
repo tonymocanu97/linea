@@ -1,0 +1,256 @@
+@import 'tailwindcss';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+
+@theme {
+  --color-background: 222 47% 6%;
+  --color-foreground: 210 40% 98%;
+  --color-card: 222 47% 8%;
+  --color-card-foreground: 210 40% 98%;
+  --color-popover: 222 47% 8%;
+  --color-popover-foreground: 210 40% 98%;
+  --color-primary: 187 92% 50%;
+  --color-primary-foreground: 222 47% 6%;
+  --color-secondary: 222 47% 12%;
+  --color-secondary-foreground: 210 40% 98%;
+  --color-muted: 222 47% 14%;
+  --color-muted-foreground: 215 20% 55%;
+  --color-accent: 187 92% 50%;
+  --color-accent-foreground: 222 47% 6%;
+  --color-destructive: 0 72% 51%;
+  --color-destructive-foreground: 210 40% 98%;
+  --color-success: 142 76% 36%;
+  --color-success-foreground: 210 40% 98%;
+  --color-warning: 45 93% 47%;
+  --color-warning-foreground: 222 47% 6%;
+  --color-border: 222 47% 16%;
+  --color-input: 222 47% 16%;
+  --color-ring: 187 92% 50%;
+
+  --color-sidebar-background: 222 47% 5%;
+  --color-sidebar-foreground: 210 40% 98%;
+  --color-sidebar-primary: 187 92% 50%;
+  --color-sidebar-primary-foreground: 222 47% 6%;
+  --color-sidebar-accent: 222 47% 12%;
+  --color-sidebar-accent-foreground: 210 40% 98%;
+  --color-sidebar-border: 222 47% 14%;
+  --color-sidebar-ring: 187 92% 50%;
+
+  --radius: 0.5rem;
+
+  --font-family-sans: 'Inter', system-ui, sans-serif;
+  --font-family-mono: 'JetBrains Mono', monospace;
+}
+
+@layer base {
+  :root {
+    --gradient-primary: linear-gradient(135deg, hsl(187 92% 50%), hsl(200 92% 40%));
+    --gradient-card: linear-gradient(180deg, hsl(222 47% 10%), hsl(222 47% 7%));
+    --gradient-glow: radial-gradient(ellipse at center, hsl(187 92% 50% / 0.15), transparent 70%);
+
+    --shadow-glow: 0 0 20px hsl(187 92% 50% / 0.2);
+    --shadow-card: 0 4px 24px hsl(0 0% 0% / 0.3);
+  }
+
+  * {
+    border-color: hsl(var(--color-border));
+  }
+
+  body {
+    background-color: hsl(var(--color-background));
+    color: hsl(var(--color-foreground));
+    font-family: var(--font-family-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .font-mono {
+    font-family: var(--font-family-mono);
+  }
+}
+
+@layer components {
+  .metric-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    border: 1px solid hsl(var(--color-border));
+    background-color: hsl(var(--color-card));
+    padding: 1rem;
+    background: var(--gradient-card);
+  }
+
+  .metric-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 300ms;
+    background: var(--gradient-glow);
+  }
+
+  .metric-card:hover::before {
+    opacity: 1;
+  }
+
+  .glow-text {
+    text-shadow: 0 0 20px hsl(187 92% 50% / 0.5);
+  }
+
+  .status-indicator {
+    position: relative;
+  }
+
+  .status-indicator::before {
+    content: '';
+    position: absolute;
+    inset: -0.25rem;
+    border-radius: 9999px;
+    animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+    opacity: 0.75;
+  }
+
+  .status-online::before {
+    background-color: hsl(var(--color-success));
+  }
+
+  .status-warning::before {
+    background-color: hsl(var(--color-warning));
+  }
+
+  .status-error::before {
+    background-color: hsl(var(--color-destructive));
+  }
+
+  .data-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .chart-container {
+    border-radius: 0.5rem;
+    border: 1px solid hsl(var(--color-border));
+    background-color: hsl(var(--color-card));
+    padding: 1rem;
+    background: var(--gradient-card);
+  }
+}
+
+@layer utilities {
+  .text-primary {
+    color: hsl(var(--color-primary));
+  }
+
+  .text-primary-foreground {
+    color: hsl(var(--color-primary-foreground));
+  }
+
+  .text-foreground {
+    color: hsl(var(--color-foreground));
+  }
+
+  .text-muted-foreground {
+    color: hsl(var(--color-muted-foreground));
+  }
+
+  .text-secondary-foreground {
+    color: hsl(var(--color-secondary-foreground));
+  }
+
+  .text-destructive {
+    color: hsl(var(--color-destructive));
+  }
+
+  .text-destructive-foreground {
+    color: hsl(var(--color-destructive-foreground));
+  }
+
+  .text-success {
+    color: hsl(var(--color-success));
+  }
+
+  .text-success-foreground {
+    color: hsl(var(--color-success-foreground));
+  }
+
+  .text-warning {
+    color: hsl(var(--color-warning));
+  }
+
+  .text-warning-foreground {
+    color: hsl(var(--color-warning-foreground));
+  }
+
+  .bg-background {
+    background-color: hsl(var(--color-background));
+  }
+
+  .bg-primary {
+    background-color: hsl(var(--color-primary));
+  }
+
+  .bg-primary\/20 {
+    background-color: hsl(var(--color-primary) / 0.2);
+  }
+
+  .bg-secondary {
+    background-color: hsl(var(--color-secondary));
+  }
+
+  .bg-secondary\/50 {
+    background-color: hsl(var(--color-secondary) / 0.5);
+  }
+
+  .bg-card {
+    background-color: hsl(var(--color-card));
+  }
+
+  .bg-muted {
+    background-color: hsl(var(--color-muted));
+  }
+
+  .bg-destructive {
+    background-color: hsl(var(--color-destructive));
+  }
+
+  .bg-success {
+    background-color: hsl(var(--color-success));
+  }
+
+  .bg-warning {
+    background-color: hsl(var(--color-warning));
+  }
+
+  .border-border {
+    border-color: hsl(var(--color-border));
+  }
+
+  .stroke-primary {
+    stroke: hsl(var(--color-primary));
+  }
+
+  .stroke-success {
+    stroke: hsl(var(--color-success));
+  }
+
+  .stroke-warning {
+    stroke: hsl(var(--color-warning));
+  }
+
+  .stroke-destructive {
+    stroke: hsl(var(--color-destructive));
+  }
+
+  .stroke-foreground {
+    stroke: hsl(var(--color-foreground));
+  }
+
+  .stroke-muted-foreground {
+    stroke: hsl(var(--color-muted-foreground));
+  }
+}

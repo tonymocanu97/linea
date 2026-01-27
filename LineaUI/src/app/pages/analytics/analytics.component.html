@@ -1,0 +1,294 @@
+<div class="flex min-h-screen bg-background">
+  <app-sidebar />
+
+  <main class="ml-64 flex-1">
+    <app-header />
+
+    <div class="p-6">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-foreground">Analytics</h2>
+        <p class="text-muted-foreground">Production analytics and insights</p>
+      </div>
+
+      <div class="grid gap-6 md:grid-cols-2 mb-6">
+        @for (item of charts; track $index) {
+          <div
+            class="chart-container animate-fade-in"
+            [style.animation-delay]="$index * 100 + 'ms'"
+          >
+            @if ($index === 0) {
+              <div class="mb-4 flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold text-foreground">{{ item.title }}</h3>
+                  <p class="text-sm text-muted-foreground">{{ item.desc }}</p>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-2">
+                    <div class="h-3 w-3 rounded-full bg-primary"></div>
+                    <span class="text-sm text-muted-foreground">Production</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="h-3 w-3 rounded-full bg-warning"></div>
+                    <span class="text-sm text-muted-foreground">Target</span>
+                  </div>
+                </div>
+              </div>
+
+              <svg viewBox="0 0 400 250" class="w-full h-[250px]">
+                <defs>
+                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="hsl(187, 92%, 50%)" stop-opacity="0.8" />
+                    <stop offset="100%" stop-color="hsl(187, 92%, 50%)" stop-opacity="0.4" />
+                  </linearGradient>
+                </defs>
+                
+                @for (tick of [0, 25, 50, 75, 100]; track tick) {
+                  <line
+                    [attr.x1]="50"
+                    [attr.x2]="380"
+                    [attr.y1]="30 + (190 * (100 - tick) / 100)"
+                    [attr.y2]="30 + (190 * (100 - tick) / 100)"
+                    stroke="hsl(222, 47%, 16%)"
+                    stroke-dasharray="3 3"
+                    stroke-width="1"
+                  />
+                }
+                
+                @for (item of productionTrendsData; track $index) {
+                  <g>
+                    <rect
+                      [attr.x]="70 + $index * 80"
+                      [attr.y]="220 - (getBarHeight(item.production, maxProductionValue) * 1.9)"
+                      [attr.width]="28"
+                      [attr.height]="getBarHeight(item.production, maxProductionValue) * 1.9"
+                      fill="url(#barGradient)"
+                      rx="2"
+                    />
+                    <rect
+                      [attr.x]="102 + $index * 80"
+                      [attr.y]="220 - (getBarHeight(item.target, maxProductionValue) * 1.9)"
+                      [attr.width]="28"
+                      [attr.height]="getBarHeight(item.target, maxProductionValue) * 1.9"
+                      fill="hsl(45, 93%, 47%)"
+                      fill-opacity="0.6"
+                      rx="2"
+                    />
+                    <text
+                      [attr.x]="98 + $index * 80"
+                      y="240"
+                      text-anchor="middle"
+                      fill="hsl(215, 20%, 55%)"
+                      font-size="12"
+                      font-family="system-ui, sans-serif"
+                    >
+                      {{ item.week }}
+                    </text>
+                  </g>
+                }
+              </svg>
+            }
+
+            @if ($index === 1) {
+              <div class="mb-4 flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold text-foreground">{{ item.title }}</h3>
+                  <p class="text-sm text-muted-foreground">{{ item.desc }}</p>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-2">
+                    <div class="h-3 w-3 rounded-full bg-success"></div>
+                    <span class="text-sm text-muted-foreground">Efficiency %</span>
+                  </div>
+                </div>
+              </div>
+
+              <svg viewBox="0 0 400 250" class="w-full h-[250px]">
+                <defs>
+                  <linearGradient id="efficiencyGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="hsl(142, 76%, 45%)" stop-opacity="0.3" />
+                    <stop offset="100%" stop-color="hsl(142, 76%, 45%)" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+                
+                @for (y of [0, 25, 50, 75, 100]; track y) {
+                  <line
+                    x1="50"
+                    x2="380"
+                    [attr.y1]="30 + (190 * (100 - y) / 100)"
+                    [attr.y2]="30 + (190 * (100 - y) / 100)"
+                    stroke="hsl(222, 47%, 16%)"
+                    stroke-dasharray="3 3"
+                  />
+                  <text
+                    x="44"
+                    [attr.y]="34 + (190 * (100 - y) / 100)"
+                    text-anchor="end"
+                    fill="hsl(215, 20%, 55%)"
+                    font-size="12"
+                    font-family="system-ui, sans-serif"
+                  >
+                    {{ y }}
+                  </text>
+                }
+                
+                <path
+                  [attr.d]="getEfficiencyAreaPath()"
+                  fill="url(#efficiencyGradient)"
+                />
+                
+                <polyline
+                  [attr.points]="getEfficiencyPoints()"
+                  fill="none"
+                  stroke="hsl(142, 76%, 45%)"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                
+                @for (point of efficiencyData; track $index) {
+                  <circle
+                    [attr.cx]="50 + ($index * 330 / (efficiencyData.length - 1))"
+                    [attr.cy]="220 - (point.efficiency * 1.9)"
+                    r="3"
+                    fill="hsl(142, 76%, 45%)"
+                  >
+                    <title>{{ point.day }}: {{ point.efficiency }}%</title>
+                  </circle>
+                }
+                
+                @for (point of efficiencyData; track $index) {
+                  <text
+                    [attr.x]="50 + ($index * 330 / (efficiencyData.length - 1))"
+                    y="240"
+                    text-anchor="middle"
+                    fill="hsl(215, 20%, 55%)"
+                    font-size="12"
+                    font-family="system-ui, sans-serif"
+                  >
+                    {{ point.day }}
+                  </text>
+                }
+              </svg>
+            }
+
+            @if ($index === 2) {
+              <div class="mb-4 flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold text-foreground">{{ item.title }}</h3>
+                  <p class="text-sm text-muted-foreground">{{ item.desc }}</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                  @for (defect of defectData; track defect.type) {
+                    <div class="flex items-center gap-2">
+                      <div class="h-3 w-3 rounded-full" [style.background-color]="defect.color"></div>
+                      <span class="text-sm text-muted-foreground">{{ defect.type }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="flex items-center justify-center h-[250px]">
+                <svg viewBox="0 0 200 200" class="w-48 h-48">
+                  @for (slice of getDefectSlices(); track $index) {
+                    <path
+                      [attr.d]="slice.path"
+                      [attr.fill]="slice.color"
+                      class="hover:opacity-80 transition-opacity cursor-pointer"
+                    >
+                      <title>{{ defectData[$index].type }}: {{ defectData[$index].value }} ({{ defectData[$index].percentage | number:'1.1-1' }}%)</title>
+                    </path>
+                  }
+                  <circle cx="100" cy="100" r="50" fill="hsl(222, 47%, 11%)" />
+                  <text
+                    x="100"
+                    y="95"
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                    fill="hsl(215, 20%, 65%)"
+                    font-size="24"
+                    font-weight="bold"
+                    font-family="system-ui, sans-serif"
+                  >
+                    {{ totalDefects }}
+                  </text>
+                  <text
+                    x="100"
+                    y="115"
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                    fill="hsl(215, 20%, 55%)"
+                    font-size="12"
+                    font-family="system-ui, sans-serif"
+                  >
+                    Total Defects
+                  </text>
+                </svg>
+              </div>
+            }
+
+            @if ($index === 3) {
+              <div class="mb-4 flex items-center justify-between">
+                <div>
+                  <h3 class="text-lg font-semibold text-foreground">{{ item.title }}</h3>
+                  <p class="text-sm text-muted-foreground">{{ item.desc }}</p>
+                </div>
+                <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-2">
+                    <div class="h-3 w-3 rounded-full bg-warning"></div>
+                    <span class="text-sm text-muted-foreground">Consumption</span>
+                  </div>
+                </div>
+              </div>
+
+              <svg viewBox="0 0 400 250" class="w-full h-[250px]">
+                <defs>
+                  <linearGradient id="energyGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="hsl(45, 93%, 47%)" stop-opacity="0.3" />
+                    <stop offset="100%" stop-color="hsl(45, 93%, 47%)" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+                
+                @for (tick of [0, 25, 50, 75, 100]; track tick) {
+                  <line
+                    x1="50"
+                    x2="380"
+                    [attr.y1]="30 + (190 * (100 - tick) / 100)"
+                    [attr.y2]="30 + (190 * (100 - tick) / 100)"
+                    stroke="hsl(222, 47%, 16%)"
+                    stroke-dasharray="3 3"
+                  />
+                }
+                
+                <path
+                  [attr.d]="getEnergyAreaPath()"
+                  fill="url(#energyGradient)"
+                />
+                
+                <path
+                  [attr.d]="getEnergyLinePath()"
+                  fill="none"
+                  stroke="hsl(45, 93%, 47%)"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+                
+                @for (label of ['00:00', '06:00', '12:00', '18:00', '23:00']; track $index) {
+                  <text
+                    [attr.x]="50 + ($index * 82.5)"
+                    y="240"
+                    text-anchor="middle"
+                    fill="hsl(215, 20%, 55%)"
+                    font-size="12"
+                    font-family="system-ui, sans-serif"
+                  >
+                    {{ label }}
+                  </text>
+                }
+              </svg>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </main>
+</div>

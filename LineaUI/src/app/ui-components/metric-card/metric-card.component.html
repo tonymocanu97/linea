@@ -1,0 +1,30 @@
+<div
+  class="metric-card group animate-fade-in"
+  [ngClass]="className"
+>
+  <div class="flex items-start justify-between">
+    <div class="space-y-1">
+      <p class="text-sm font-medium text-muted-foreground">
+        {{ title }}
+      </p>
+
+      <div class="flex items-baseline gap-1">
+        <span class="font-mono text-3xl font-bold" [ngClass]="statusColors[status]">
+          {{ value }}
+        </span>
+
+        <span *ngIf="unit" class="text-sm text-muted-foreground">
+          {{ unit }}
+        </span>
+      </div>
+    </div>
+
+    <div class="rounded-lg p-2.5" [ngClass]="statusBg[status]">
+      <lucide-icon [name]="icon" class="h-5 w-5" [ngClass]="statusColors[status]"></lucide-icon>
+    </div>
+  </div>
+
+  <div class="mt-3 h-4 flex items-center gap-1.5">
+    <ng-template />
+  </div>
+</div>
