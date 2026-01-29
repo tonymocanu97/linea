@@ -55,4 +55,34 @@ namespace Linea.Application.DTOs
         int TargetProductionRate,
         int EfficiencyPercentage
     );
+
+    public sealed record EquipmentDto 
+    (
+        Guid Id,
+        string Name,
+        string Status,
+        int TargetProductionRate,
+        string? Notes
+    );
+
+    public sealed record CreateEquipmentDto
+    (
+        string Name,
+        string Status,
+        int TargetProductionRate,
+        string? Notes
+    );
+
+    public sealed record UpdateEquipmentDto
+    (
+        string? Name,
+        string? Status,
+        int? TargetProductionRate,
+        string? Notes
+    );
+
+    public sealed record SetMaintenanceModeDto
+    (
+        string Reason
+    );
 }

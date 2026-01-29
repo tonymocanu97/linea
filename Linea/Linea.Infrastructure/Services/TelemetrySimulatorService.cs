@@ -59,6 +59,8 @@ namespace Linea.Infrastructure.Services
             var today = DateTime.UtcNow;
             var shift = GetCurrentShiftUtc(DateTime.UtcNow);
 
+            var equipment = await database.Equipment.FirstAsync(cancellationToken);
+
             foreach (var lineName in Lines)
             {
                 var report = await database.ProductionReports
@@ -71,6 +73,7 @@ namespace Linea.Infrastructure.Services
                         Date = today,
                         Shift = shift,
                         LineName = lineName,
+                        EquipmentId = equipment.Id,
                         GoodCount = 0,
                         ScrapCount = 0,
                         Notes = "Auto-generated report"

@@ -10,6 +10,7 @@ namespace Linea.Infrastructure.Persistence
         public DbSet<ProductionReport> ProductionReports => Set<ProductionReport>();
         public DbSet<Defect> Defects => Set<Defect>();
         public DbSet<Downtime> Downtimes => Set<Downtime>();
+        public DbSet<Equipment> Equipment => Set<Equipment>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -21,10 +22,14 @@ namespace Linea.Infrastructure.Persistence
                 b.HasKey(x => x.Id);
 
                 b.Property(x => x.LineName).HasMaxLength(100);
-                b.Property(x => x.EquipmentName).HasMaxLength(100);
-
-                b.HasIndex(x => new { x.Date, x.Shift, x.LineName, x.EquipmentName }).IsUnique();
                 
+                b.HasOne(x => x.Equipment)
+                    .WithMany(e => e.ProductionReports)
+                    .HasForeignKey(x => x.EquipmentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                b.HasIndex(x => new { x.Date, x.Shift, x.LineName, x.EquipmentId }).IsUnique();
+
                 b.HasMany(x => x.Defects)
                     .WithOne(x => x.ProductionReport!)
                     .HasForeignKey(x => x.ProductionReportId)
@@ -54,6 +59,17 @@ namespace Linea.Infrastructure.Persistence
                 b.Property(x => x.Reason).HasMaxLength(200);
 
                 b.Ignore(x => x.Duration);
+            });
+
+            modelBuilder.Entity<Equipment>(b =>
+            {
+                b.ToTable("equipments");
+                b.HasKey(x => x.Id);
+
+                b.Property(x => x.Name).HasMaxLength(100);
+                b.Property(x => x.Status).HasMaxLength(50);
+                b.Property(x => x.TargetProductionRate).HasDefaultValue(0);
+                b.Property(x => x.Notes).HasMaxLength(500);
             });
         }
     }

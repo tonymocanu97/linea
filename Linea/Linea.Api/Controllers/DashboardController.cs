@@ -73,5 +73,81 @@ namespace Linea.Api.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+
+        [HttpPost("equipment")]
+        public async Task<ActionResult<EquipmentDto>> AddEquipment([FromBody] CreateEquipmentDto equipment, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _dashboardService.AddEquipmentAsync(equipment, cancellationToken);
+                return CreatedAtAction(nameof(AddEquipment), new { id = result.Id }, result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpPatch("equipment/{id}")]
+        public async Task<ActionResult<EquipmentDto>> UpdateEquipment([FromRoute] Guid id, [FromBody] UpdateEquipmentDto equipment, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _dashboardService.UpdateEquipmentAsync(id, equipment, cancellationToken);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpPost("equipment/{id}/maintenance")]
+        public async Task<ActionResult<EquipmentDto>> SetMaintenanceMode([FromRoute] Guid id, [FromBody] SetMaintenanceModeDto request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _dashboardService.SetMaintenanceModeAsync(id, request, cancellationToken);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpDelete("equipment/{id}")]
+        public async Task<IActionResult> DeleteEquipment([FromRoute] Guid id, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _dashboardService.DeleteEquipmentAsync(id, cancellationToken);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
     }
 }
