@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
-import { AnalyticsComponent } from './pages/analytics/analytics.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { EquipmentComponent } from '@components/equipment/equipment.component';
+import { AnalyticsComponent } from '@pages/analytics/analytics.component';
+import { DashboardComponent } from '@pages/dashboard/dashboard.component';
 
 export const routes: Routes = [
     { path: '', component: DashboardComponent },
@@ -9,7 +10,7 @@ export const routes: Routes = [
     { path: 'monitor', component: DashboardComponent },
     { path: 'analytics', component: AnalyticsComponent },
 
-    { path: 'equipment', component: DashboardComponent },
+    { path: 'equipment', component: EquipmentComponent },
     { path: 'reports', component: DashboardComponent },
     { path: 'alerts', component: DashboardComponent },
 

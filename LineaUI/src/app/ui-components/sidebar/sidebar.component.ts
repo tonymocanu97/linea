@@ -2,16 +2,16 @@ import { NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import {
-    Activity,
-    ChartColumn,
-    Cpu,
-    Factory,
-    FileText,
-    LayoutDashboard,
-    LucideAngularModule,
-    Settings,
-    TriangleAlert,
-    Users,
+  Activity,
+  ChartColumn,
+  Cpu,
+  Factory,
+  FileText,
+  LayoutDashboard,
+  LucideAngularModule,
+  Settings,
+  TriangleAlert,
+  Users,
 } from 'lucide-angular';
 
 interface NavItem {
@@ -46,7 +46,7 @@ export class SidebarComponent {
   ];
 
   productionItems: NavItem[] = [
-    { label: 'Equipment', icon: this.cpu, comingSoon: true },
+    { label: 'Equipment', icon: this.cpu, route: '/equipment' },
     { label: 'Reports', icon: this.fileText, comingSoon: true },
     { label: 'Alerts', icon: this.alertTriangle, comingSoon: true, badge: 3 },
   ];

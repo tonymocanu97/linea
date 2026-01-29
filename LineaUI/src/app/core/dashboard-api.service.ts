@@ -46,4 +46,38 @@ export class DashboardApiService {
     }
     return this.http.get<EquipmentStatus[]>(`${this.baseUrl}/equipment-status`, { params });
   }
+
+  addEquipment(equipment: {
+    id: string;
+    name: string;
+    status: EquipmentStatus['status'];
+    targetProductionRate: number;
+  }): Observable<EquipmentStatus> {
+    return this.http.post<EquipmentStatus>(`${this.baseUrl}/equipment`, equipment);
+  }
+
+  updateEquipment(
+    equipmentId: string,
+    updates: {
+      name?: string;
+      status?: EquipmentStatus['status'];
+      targetProductionRate?: number;
+    }
+  ): Observable<EquipmentStatus> {
+    return this.http.patch<EquipmentStatus>(`${this.baseUrl}/equipment/${equipmentId}`, updates);
+  }
+
+  setMaintenanceMode(
+    equipmentId: string,
+    data: { note?: string }
+  ): Observable<EquipmentStatus> {
+    return this.http.post<EquipmentStatus>(
+      `${this.baseUrl}/equipment/${equipmentId}/maintenance`,
+      data
+    );
+  }
+
+  deleteEquipment(equipmentId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/equipment/${equipmentId}`);
+  }
 }
