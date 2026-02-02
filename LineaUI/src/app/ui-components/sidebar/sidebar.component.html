@@ -71,10 +71,10 @@
         </span>
 
         <span
-          *ngIf="item.badge && item.badge > 0"
+          *ngIf="(getBadgeCount(item) ?? 0) > 0"
           class="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-bold text-destructive-foreground"
         >
-          {{ item.badge }}
+          {{ getBadgeCount(item) }}
         </span>
       </a>
     </div>

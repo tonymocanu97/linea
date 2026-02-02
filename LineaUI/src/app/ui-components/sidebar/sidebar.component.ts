@@ -1,6 +1,7 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { AlertsBadgeService } from '@core/alerts-badge.service';
 import {
   Activity,
   ChartColumn,
@@ -28,7 +29,7 @@ interface NavItem {
   imports: [RouterModule, NgFor, NgIf, LucideAngularModule],
   templateUrl: './sidebar.component.html',
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
   layoutDashboard = LayoutDashboard;
   activity = Activity;
   fileText = FileText;
@@ -39,6 +40,8 @@ export class SidebarComponent {
   cpu = Cpu;
   factory = Factory;
 
+  alertsBadgeCount = 0;
+
   overviewItems: NavItem[] = [
     { label: 'Dashboard', icon: this.layoutDashboard, route: '/dashboard' },
     { label: 'Real-time Monitor', icon: this.activity, comingSoon: true },
@@ -48,8 +51,22 @@ export class SidebarComponent {
   productionItems: NavItem[] = [
     { label: 'Equipment', icon: this.cpu, route: '/equipment' },
     { label: 'Reports', icon: this.fileText, route: '/reports' },
-    { label: 'Alerts', icon: this.alertTriangle, comingSoon: true, badge: 3 },
+    { label: 'Alerts', icon: this.alertTriangle, route: '/alerts' },
   ];
+
+  constructor(private alertsBadge: AlertsBadgeService) {}
+
+  ngOnInit(): void {
+    this.alertsBadge.load();
+    this.alertsBadge.badgeCount$.subscribe((count) => (this.alertsBadgeCount = count));
+  }
+
+  getBadgeCount(item: NavItem): number | undefined {
+    if (item.route === '/alerts') {
+      return this.alertsBadgeCount;
+    }
+    return item.badge;
+  }
 
   managementItems: NavItem[] = [
     { label: 'Users', icon: this.users, comingSoon: true },

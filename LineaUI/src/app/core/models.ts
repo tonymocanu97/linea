@@ -23,7 +23,7 @@ export interface HourlyProductionPoint {
 export interface Downtime {
   id: string;
   startTime: string;
-  endTime: string;
+  endTime: string | null;
   type: string;
   reason: string;
   lineName: string;
