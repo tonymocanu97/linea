@@ -43,7 +43,7 @@ namespace Linea.Infrastructure.Services
 
             var totalDowntime = await _database.Downtimes.AsNoTracking()
                 .Where(d => reportIds.Contains(d.ProductionReportId))
-                .SumAsync(d => (int)Math.Max(0, (d.EndTime - d.StartTime).TotalMinutes), cancellationToken);
+                .SumAsync(d => (int)Math.Max(0, ((d.EndTime ?? DateTime.UtcNow) - d.StartTime).TotalMinutes), cancellationToken);
 
             var topDefects = await _database.Defects.AsNoTracking()
                 .Where(d => reportIds.Contains(d.ProductionReportId))
@@ -125,7 +125,7 @@ namespace Linea.Infrastructure.Services
                 Reason: d.Reason,
                 LineName: d.ProductionReport?.LineName ?? string.Empty,
                 EquipmentName: d.ProductionReport?.Equipment?.Name ?? string.Empty,
-                Duration: (int)Math.Max(0, (d.EndTime - d.StartTime).TotalMinutes)
+                Duration: (int)Math.Max(0, ((d.EndTime ?? DateTime.UtcNow) - d.StartTime).TotalMinutes)
             )).ToList();
 
             return result;

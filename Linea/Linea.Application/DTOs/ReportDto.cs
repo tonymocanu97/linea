@@ -38,7 +38,7 @@ namespace Linea.Application.DTOs
     (
         Guid Id,
         DateTime StartTime,
-        DateTime EndTime,
+        DateTime? EndTime,
         string Type,
         string Reason,
         string LineName,

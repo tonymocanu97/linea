@@ -186,10 +186,10 @@ namespace Linea.Infrastructure.Services
                 .Select(d => new DowntimeDto(
                     d.Id,
                     d.StartTime,
-                    d.EndTime,
+                    d.EndTime ?? DateTime.UtcNow,
                     d.Type,
                     d.Reason,
-                    (int)Math.Max(0, (d.EndTime - d.StartTime).TotalMinutes)))
+                    (int)Math.Max(0, ((d.EndTime ?? DateTime.UtcNow) - d.StartTime).TotalMinutes)))
                 .ToList();
 
             return new ReportDto(

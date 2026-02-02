@@ -144,7 +144,7 @@ namespace Linea.Infrastructure.Services
                 content.AppendLine("Type,Reason,Duration (min),Start Time,End Time");
                 foreach (var downtime in downtimes)
                 {
-                    var duration = (int)Math.Max(0, (downtime.EndTime - downtime.StartTime).TotalMinutes);
+                    var duration = (int)Math.Max(0, ((downtime.EndTime ?? DateTime.UtcNow) - downtime.StartTime).TotalMinutes);
                     content.AppendLine($"\"{downtime.Type}\",\"{downtime.Reason}\",{duration},{downtime.StartTime:yyyy-MM-dd HH:mm},{downtime.EndTime:yyyy-MM-dd HH:mm}");
                 }
                 content.AppendLine();
