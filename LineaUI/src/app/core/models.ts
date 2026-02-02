@@ -39,3 +39,20 @@ export interface EquipmentStatus {
   targetProductionRate: number;
   efficiencyPercentage: number;
 }
+
+export interface GenerateReportRequest {
+  date?: string;
+  shift?: number | null;
+  lineName?: string;
+  equipmentId?: string;
+}
+
+export interface GeneratedReport {
+  id: string;
+  createdAt: string;
+  dateFilter?: string;
+  shiftFilter?: number;
+  lineNameFilter?: string;
+  equipmentIdFilter?: string;
+  equipmentName?: string;
+}

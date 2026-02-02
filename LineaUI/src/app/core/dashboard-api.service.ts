@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { DashboardSummary, Downtime, EquipmentStatus, HourlyProductionPoint } from './models';
+import { DashboardSummary, Downtime, EquipmentStatus, GeneratedReport, GenerateReportRequest, HourlyProductionPoint } from './models';
 
 @Injectable({
   providedIn: 'root',
@@ -79,5 +79,19 @@ export class DashboardApiService {
 
   deleteEquipment(equipmentId: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/equipment/${equipmentId}`);
+  }
+
+  getGeneratedReports(): Observable<GeneratedReport[]> {
+    return this.http.get<GeneratedReport[]>('/api/generatedreports');
+  }
+
+  createGeneratedReport(request: GenerateReportRequest): Observable<GeneratedReport> {
+    return this.http.post<GeneratedReport>('/api/generatedreports', request);
+  }
+
+  downloadGeneratedReport(reportId: string): Observable<Blob> {
+    return this.http.get(`/api/generatedreports/${reportId}/download`, {
+      responseType: 'blob'
+    });
   }
 }

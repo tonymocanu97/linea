@@ -47,7 +47,7 @@ export class SidebarComponent {
 
   productionItems: NavItem[] = [
     { label: 'Equipment', icon: this.cpu, route: '/equipment' },
-    { label: 'Reports', icon: this.fileText, comingSoon: true },
+    { label: 'Reports', icon: this.fileText, route: '/reports' },
     { label: 'Alerts', icon: this.alertTriangle, comingSoon: true, badge: 3 },
   ];
 
