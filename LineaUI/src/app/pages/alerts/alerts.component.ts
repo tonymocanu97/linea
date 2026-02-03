@@ -1,11 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { Bell, CircleCheck, CircleX, Funnel, LucideAngularModule, TriangleAlert } from 'lucide-angular';
-import { HeaderComponent } from '@components/header/header.component';
-import { SidebarComponent } from '@components/sidebar/sidebar.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { AlertsBadgeService } from '@core/alerts-badge.service';
-import { DashboardApiService } from '@core/dashboard-api.service';
-import { Downtime } from '@core/models';
+import { Component, OnInit } from '@angular/core';
+import { HeaderComponent, SidebarComponent } from '@components';
+import { AlertsBadgeService, DashboardApiService, Downtime } from '@shared';
+import { Bell, CircleCheck, CircleX, Funnel, LucideAngularModule, TriangleAlert } from 'lucide-angular';
 
 type AlertSeverity = 'error' | 'warning' | 'info' | 'success';
 

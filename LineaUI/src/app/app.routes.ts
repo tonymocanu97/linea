@@ -1,10 +1,5 @@
 import { Routes } from '@angular/router';
-import { EquipmentComponent } from '@components/equipment/equipment.component';
-import { AnalyticsComponent } from '@pages/analytics/analytics.component';
-import { DashboardComponent } from '@pages/dashboard/dashboard.component';
-import { ReportsComponent } from '@components/reports/reports.component';
-import { AlertsComponent } from '@components/alerts/alerts.component';
-import { SettingsComponent } from '@components/settings/settings.component';
+import { AlertsComponent, AnalyticsComponent, DashboardComponent, EquipmentComponent, ReportsComponent, SettingsComponent } from '@pages';
 
 export const routes: Routes = [
     { path: '', component: DashboardComponent },

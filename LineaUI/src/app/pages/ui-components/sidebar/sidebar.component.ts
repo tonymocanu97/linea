@@ -1,7 +1,7 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { AlertsBadgeService } from '@core/alerts-badge.service';
+import { AlertsBadgeService } from '@shared';
 import {
   Activity,
   ChartColumn,

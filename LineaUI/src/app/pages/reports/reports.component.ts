@@ -1,12 +1,9 @@
-import { Component } from '@angular/core';
-import { HeaderComponent } from '@components/header/header.component';
-import { SidebarComponent } from '@components/sidebar/sidebar.component';
-import { ModalComponent } from '@components/modal/modal.component';
-import { Calendar, Download, FileText, LucideAngularModule, Plus } from 'lucide-angular';
 import { DatePipe, NgFor, NgIf } from '@angular/common';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DashboardApiService } from '@core/dashboard-api.service';
-import { EquipmentStatus, GeneratedReport, GenerateReportRequest } from '@core/models';
+import { HeaderComponent, SidebarComponent } from '@components';
+import { DashboardApiService, EquipmentStatus, GeneratedReport, GenerateReportRequest, ModalComponent } from '@shared';
+import { Calendar, Download, FileText, LucideAngularModule, Plus } from 'lucide-angular';
 
 @Component({
   selector: 'app-reports',

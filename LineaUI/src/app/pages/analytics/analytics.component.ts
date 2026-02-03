@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { HeaderComponent } from '@components/header/header.component';
-import { SidebarComponent } from '@components/sidebar/sidebar.component';
-import { DashboardApiService } from '@core/dashboard-api.service';
-import { DashboardSummary, HourlyProductionPoint } from '@core/models';
+import { HeaderComponent, SidebarComponent } from '@components';
+import { DashboardApiService, DashboardSummary, HourlyProductionPoint } from '@shared';
 import { LucideAngularModule } from 'lucide-angular';
 import { forkJoin } from 'rxjs';
 

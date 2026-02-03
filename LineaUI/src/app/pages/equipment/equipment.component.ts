@@ -1,17 +1,14 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HeaderComponent } from '@components/header/header.component';
-import { ModalComponent } from '@components/modal/modal.component';
-import { SidebarComponent } from '@components/sidebar/sidebar.component';
-import { DashboardApiService } from '@core/dashboard-api.service';
-import { EquipmentStatus } from '@core/models';
+import { HeaderComponent, SidebarComponent } from '@components';
+import { DashboardApiService, EquipmentStatus, ModalComponent } from '@shared';
 import {
-    Cpu,
-    LucideAngularModule,
-    Plus,
-    Settings,
-    Wrench,
+  Cpu,
+  LucideAngularModule,
+  Plus,
+  Settings,
+  Wrench,
 } from 'lucide-angular';
 
 interface NewEquipment {

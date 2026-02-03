@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
-import { Settings, LucideAngularModule } from 'lucide-angular';
-import { SidebarComponent } from '@components/sidebar/sidebar.component';
-import { HeaderComponent } from '@components/header/header.component';
 import { FormsModule } from '@angular/forms';
+import { HeaderComponent, SidebarComponent } from '@components';
+import { LucideAngularModule, Settings } from 'lucide-angular';
 
 @Component({
   selector: 'app-settings',

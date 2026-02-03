@@ -1,6 +1,6 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { EquipmentStatus } from '@core/models';
+import { EquipmentStatus } from '@shared';
 import {
   Activity,
   CircleAlert,

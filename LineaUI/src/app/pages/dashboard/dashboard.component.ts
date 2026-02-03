@@ -1,15 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AlertsListComponent } from '@components/alerts-list/alerts-list.component';
-import { EquipmentStatusComponent } from '@components/equipment-status/equipment-status.component';
-import { HeaderComponent } from '@components/header/header.component';
-import { MetricCardComponent } from '@components/metric-card/metric-card.component';
-import { OeeGaugeComponent } from '@components/oee-gauge/oee-gauge.component';
-import { ProductionChartComponent } from '@components/production-chart/production-chart.component';
-import { SidebarComponent } from '@components/sidebar/sidebar.component';
-import { DashboardApiService } from '@core/dashboard-api.service';
-import { DashboardSummary, EquipmentStatus, HourlyProductionPoint } from '@core/models';
+import { AlertsListComponent, EquipmentStatusComponent, HeaderComponent, MetricCardComponent, OeeGaugeComponent, ProductionChartComponent, SidebarComponent } from '@components';
+import { DashboardApiService, DashboardSummary, EquipmentStatus, HourlyProductionPoint } from '@shared';
 import { Gauge, Package, PackageCheck, PackageMinus, TimerIcon } from 'lucide-angular';
 import { forkJoin } from 'rxjs';
 

@@ -1,7 +1,6 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { DashboardApiService } from '@core/dashboard-api.service';
-import { Downtime } from '@core/models';
+import { DashboardApiService, Downtime } from '@shared';
 import {
   Clock,
   LucideAngularModule,
