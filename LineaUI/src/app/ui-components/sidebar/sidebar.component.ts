@@ -70,7 +70,7 @@ export class SidebarComponent implements OnInit {
 
   managementItems: NavItem[] = [
     { label: 'Users', icon: this.users, comingSoon: true },
-    { label: 'Settings', icon: this.settings, comingSoon: true },
+    { label: 'Settings', icon: this.settings, route: '/settings' },
   ];
 
   showComingSoon() {
