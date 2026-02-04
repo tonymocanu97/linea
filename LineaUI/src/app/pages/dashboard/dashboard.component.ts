@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AlertsListComponent, EquipmentStatusComponent, HeaderComponent, MetricCardComponent, OeeGaugeComponent, ProductionChartComponent, SidebarComponent } from '@components';
-import { DashboardApiService, DashboardSummary, EquipmentStatus, HourlyProductionPoint } from '@shared';
+import { DashboardApiService, DashboardSummary, Downtime, EquipmentStatus, HourlyProductionPoint } from '@shared';
 import { Gauge, Package, PackageCheck, PackageMinus, TimerIcon } from 'lucide-angular';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 
 function toDateOnlyString(d: Date): string {
   const yyyy = d.getFullYear();
@@ -104,10 +104,17 @@ export class DashboardComponent {
       summary: this.api.getSummary(this.from, this.to),
       hourly: this.api.getHourlyProduction(this.from, this.to),
       equipment: this.api.getEquipmentStatus(),
+      downtimes: this.api.getDowntimes(this.from, this.to).pipe(
+        catchError(() => of<Downtime[]>([]))
+      ),
     }).subscribe({
       next: (res) => {
         this.summary = res.summary;
-        this.metrics = this.computeOeeMetrics(res.summary);
+        const calculatedDowntime = this.calculateDowntimeFromRecords(res.downtimes);
+        if (calculatedDowntime > 0 && (!this.summary.totalDowntimeMinutes || this.summary.totalDowntimeMinutes === 0)) {
+          this.summary.totalDowntimeMinutes = calculatedDowntime;
+        }
+        this.metrics = this.computeOeeMetrics(this.summary);
         this.productionChartData = this.buildProductionChartData(res.hourly);
         this.equipmentStatusData = res.equipment;
         this.loading = false;
@@ -117,6 +124,32 @@ export class DashboardComponent {
         this.loading = false;
       },
     });
+  }
+
+  private calculateDowntimeFromRecords(downtimes: Downtime[]): number {
+    if (!downtimes || downtimes.length === 0) {
+      return 0;
+    }
+
+    const fromDate = new Date(this.from);
+    const toDate = new Date(this.to);
+    toDate.setHours(23, 59, 59, 999);
+
+    let totalMinutes = 0;
+
+    for (const downtime of downtimes) {
+      const startTime = new Date(downtime.startTime);
+      const endTime = downtime.endTime ? new Date(downtime.endTime) : new Date();
+
+      if (endTime >= fromDate && startTime <= toDate) {
+        const rangeStart = startTime < fromDate ? fromDate : startTime;
+        const rangeEnd = endTime > toDate ? toDate : endTime;
+        const minutes = Math.max(0, (rangeEnd.getTime() - rangeStart.getTime()) / (1000 * 60));
+        totalMinutes += minutes;
+      }
+    }
+
+    return Math.round(totalMinutes);
   }
 
   private computeOeeMetrics(s: DashboardSummary) {

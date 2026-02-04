@@ -41,9 +41,39 @@ namespace Linea.Infrastructure.Services
                 })
                 .FirstOrDefaultAsync(cancellationToken) ?? new { Good = 0, Scrap = 0 };
 
-            var totalDowntime = await _database.Downtimes.AsNoTracking()
-                .Where(d => reportIds.Contains(d.ProductionReportId))
-                .SumAsync(d => (int)Math.Max(0, ((d.EndTime ?? DateTime.UtcNow) - d.StartTime).TotalMinutes), cancellationToken);
+            var fromDateTime = from.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            var toDateTime = to.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc);
+            
+            var downtimeQuery = _database.Downtimes.AsNoTracking()
+                .Include(d => d.ProductionReport)
+                .ThenInclude(p => p.Equipment)
+                .AsQueryable();
+
+            downtimeQuery = downtimeQuery.Where(d => 
+                (d.EndTime == null || d.EndTime >= fromDateTime) && 
+                d.StartTime <= toDateTime);
+
+            if (!string.IsNullOrWhiteSpace(lineName))
+            {
+                downtimeQuery = downtimeQuery.Where(d => 
+                    d.ProductionReport != null && 
+                    d.ProductionReport.LineName == lineName.Trim());
+            }
+
+            var downtimes = await downtimeQuery.ToListAsync(cancellationToken);
+            
+            var totalDowntime = 0;
+            foreach (var downtime in downtimes)
+            {
+                var startTime = downtime.StartTime < fromDateTime ? fromDateTime : downtime.StartTime;
+                var endTime = downtime.EndTime ?? DateTime.UtcNow;
+                endTime = endTime > toDateTime ? toDateTime : endTime;
+                
+                if (endTime > startTime)
+                {
+                    totalDowntime += (int)Math.Max(0, (endTime - startTime).TotalMinutes);
+                }
+            }
 
             var topDefects = await _database.Defects.AsNoTracking()
                 .Where(d => reportIds.Contains(d.ProductionReportId))
@@ -64,7 +94,7 @@ namespace Linea.Infrastructure.Services
                 TotalGood: totals.Good,
                 TotalScrap: totals.Scrap,
                 ScrapRatePercent: Math.Round(scrapRate, 2),
-                TotalDowntime: totalDowntime,
+                TotalDowntimeMinutes: totalDowntime,
                 TopDefects: topDefects
             );
         }
@@ -116,6 +146,49 @@ namespace Linea.Infrastructure.Services
             var downtimes = await query
                 .OrderByDescending(d => d.StartTime)
                 .ToListAsync();
+
+            var result = downtimes.Select(d => new ActiveDowntimeDto(
+                Id: d.Id,
+                StartTime: d.StartTime,
+                EndTime: d.EndTime,
+                Type: d.Type,
+                Reason: d.Reason,
+                LineName: d.ProductionReport?.LineName ?? string.Empty,
+                EquipmentName: d.ProductionReport?.Equipment?.Name ?? string.Empty,
+                Duration: (int)Math.Max(0, ((d.EndTime ?? DateTime.UtcNow) - d.StartTime).TotalMinutes)
+            )).ToList();
+
+            return result;
+        }
+
+        public async Task<List<ActiveDowntimeDto>> GetDowntimes(DateOnly from, DateOnly to, string? lineName = null, CancellationToken cancellationToken = default)
+        {
+            if (to < from)
+            {
+                throw new ArgumentException("'to' date must be greater than or equal to 'from' date.");
+            }
+
+            var fromDateTime = from.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            var toDateTime = to.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc);
+
+            var query = _database.Downtimes
+                .AsNoTracking()
+                .Include(d => d.ProductionReport)
+                .ThenInclude(p => p.Equipment)
+                .AsQueryable();
+
+            query = query.Where(d => 
+                (d.EndTime == null || d.EndTime >= fromDateTime) && 
+                d.StartTime <= toDateTime);
+
+            if (!string.IsNullOrWhiteSpace(lineName))
+            {
+                query = query.Where(d => d.ProductionReport != null && d.ProductionReport.LineName == lineName.Trim());
+            }
+
+            var downtimes = await query
+                .OrderByDescending(d => d.StartTime)
+                .ToListAsync(cancellationToken);
 
             var result = downtimes.Select(d => new ActiveDowntimeDto(
                 Id: d.Id,

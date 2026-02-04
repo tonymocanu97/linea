@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Linea.Application.DTOs.Dashboard
 {
@@ -12,7 +12,7 @@ namespace Linea.Application.DTOs.Dashboard
         int TotalGood,
         int TotalScrap,
         decimal ScrapRatePercent,
-        int TotalDowntime,
+        int TotalDowntimeMinutes,
         IReadOnlyList<TopDefectDto> TopDefects
     );
 }

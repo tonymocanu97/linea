@@ -1,4 +1,4 @@
-﻿using Linea.Application.DTOs;
+using Linea.Application.DTOs;
 using Linea.Application.DTOs.Dashboard;
 using Linea.Application.Interfaces;
 using Linea.Domain.Entities;
@@ -53,6 +53,24 @@ namespace Linea.Api.Controllers
             {
                 var result = await _dashboardService.GetActiveDowntimes(lineName, cancellationToken);
                 return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("downtimes")]
+        public async Task<ActionResult<List<ActiveDowntimeDto>>> GetDowntimes([FromQuery] DateOnly from, [FromQuery] DateOnly to, [FromQuery] string? lineName, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _dashboardService.GetDowntimes(from, to, lineName, cancellationToken);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
