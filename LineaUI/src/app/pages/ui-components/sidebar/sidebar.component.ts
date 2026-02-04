@@ -1,7 +1,7 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { AlertsBadgeService } from '@shared';
+import { AlertsBadgeService, SettingsService } from '@shared';
 import {
   Activity,
   ChartColumn,
@@ -41,6 +41,7 @@ export class SidebarComponent implements OnInit {
   factory = Factory;
 
   alertsBadgeCount = 0;
+  companyName = 'Production Form';
 
   overviewItems: NavItem[] = [
     { label: 'Dashboard', icon: this.layoutDashboard, route: '/dashboard' },
@@ -54,11 +55,19 @@ export class SidebarComponent implements OnInit {
     { label: 'Alerts', icon: this.alertTriangle, route: '/alerts' },
   ];
 
-  constructor(private alertsBadge: AlertsBadgeService) {}
+  constructor(
+    private alertsBadge: AlertsBadgeService,
+    private settingsService: SettingsService,
+  ) {}
 
   ngOnInit(): void {
     this.alertsBadge.load();
     this.alertsBadge.badgeCount$.subscribe((count) => (this.alertsBadgeCount = count));
+    
+    this.companyName = this.settingsService.getCompanyName();
+    this.settingsService.companyName$.subscribe((name) => {
+      this.companyName = name;
+    });
   }
 
   getBadgeCount(item: NavItem): number | undefined {
