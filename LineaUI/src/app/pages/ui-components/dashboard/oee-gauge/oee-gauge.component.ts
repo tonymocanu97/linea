@@ -19,27 +19,23 @@ export class OeeGaugeComponent {
 
   private readonly colorClasses: Record<
     OEEGaugeColor,
-    { stroke: string; text: string; glow: string }
+    { stroke: string; text: string }
   > = {
     primary: {
       stroke: 'stroke-primary',
       text: 'text-primary',
-      glow: 'drop-shadow-[0_0_10px_hsl(187,92%,50%,0.5)]',
     },
     success: {
       stroke: 'stroke-success',
       text: 'text-success',
-      glow: 'drop-shadow-[0_0_10px_hsl(142,76%,36%,0.5)]',
     },
     warning: {
       stroke: 'stroke-warning',
       text: 'text-warning',
-      glow: 'drop-shadow-[0_0_10px_hsl(45,93%,47%,0.5)]',
     },
     destructive: {
       stroke: 'stroke-destructive',
       text: 'text-destructive',
-      glow: 'drop-shadow-[0_0_10px_hsl(0,72%,51%,0.5)]',
     },
   };
 
@@ -55,7 +51,7 @@ export class OeeGaugeComponent {
 
   get ringClassList(): string[] {
     const c = this.colorClasses[this.color] ?? this.colorClasses.primary;
-    return [c.stroke, c.glow];
+    return [c.stroke];
   }
 
   get textClassList(): string[] {

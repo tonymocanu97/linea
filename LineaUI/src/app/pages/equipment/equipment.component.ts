@@ -51,7 +51,6 @@ export class EquipmentComponent {
 
   addDialogOpen = false;
   configureDialogOpen = false;
-  maintenanceDialogOpen = false;
   selectedEquipment: EquipmentStatus | null = null;
 
   newEquipment: NewEquipment = {
@@ -66,8 +65,6 @@ export class EquipmentComponent {
     status: 'running',
     targetProductionRate: 100,
   };
-
-  maintenanceNote = '';
 
   constructor(private api: DashboardApiService) {
     this.loadEquipment();
@@ -127,12 +124,6 @@ export class EquipmentComponent {
     this.configureDialogOpen = true;
   }
 
-  openMaintenanceDialog(equipment: EquipmentStatus): void {
-    this.selectedEquipment = equipment;
-    this.maintenanceNote = '';
-    this.maintenanceDialogOpen = true;
-  }
-
   handleAddEquipment(): void {
     if (!this.newEquipment.id || !this.newEquipment.name) {
       alert('Please fill in all required fields');
@@ -150,7 +141,7 @@ export class EquipmentComponent {
         this.addDialogOpen = false;
         alert(`${newEq.name} has been added`);
       },
-      error: (err) => alert('Failed to add equipment'),
+      error: (err) => alert(`Failed to add equipment: ${err}`),
     });
   }
 
@@ -167,24 +158,6 @@ export class EquipmentComponent {
         alert(`${updated.name} has been updated`);
       },
       error: (err) => alert(`Failed to update equipment: ${err}`),
-    });
-  }
-
-  handleMaintenance(): void {
-    if (!this.selectedEquipment) return;
-
-    this.api.setMaintenanceMode(this.selectedEquipment.id, {
-      note: this.maintenanceNote
-    }).subscribe({
-      next: (updated) => {
-        const index = this.equipmentList.findIndex(eq => eq.id === this.selectedEquipment!.id);
-        if (index !== -1) {
-          this.equipmentList[index] = updated;
-        }
-        this.maintenanceDialogOpen = false;
-        alert(`${updated.name} is now in maintenance mode`);
-      },
-      error: (err) => alert('Failed to schedule maintenance'),
     });
   }
 }

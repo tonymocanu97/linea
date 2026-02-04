@@ -1,5 +1,6 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { DashboardApiService, Downtime } from '@shared';
 import {
   Clock,
@@ -23,7 +24,7 @@ export interface AlertItem {
 @Component({
   selector: 'app-alerts-list',
   standalone: true,
-  imports: [NgFor, NgIf, NgClass, LucideAngularModule],
+  imports: [NgFor, NgIf, NgClass, LucideAngularModule, RouterModule],
   templateUrl: './alerts-list.component.html',
 })
 export class AlertsListComponent implements OnInit {

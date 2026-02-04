@@ -14,7 +14,7 @@
           </div>
   
           <button
-            class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-primary-foreground hover:opacity-90"
+            class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-primary-foreground hover:opacity-90 cursor-pointer"
             (click)="openGenerateDialog()"
           >
             <lucide-icon [name]="plus" class="h-4 w-4"></lucide-icon>
@@ -81,7 +81,7 @@
                 </div>
   
                 <button
-                  class="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-secondary"
+                  class="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-secondary cursor-pointer"
                   (click)="downloadReport(report)"
                 >
                   <lucide-icon
@@ -157,13 +157,13 @@
 
         <div class="flex justify-end gap-2">
           <button
-            class="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary"
+            class="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary cursor-pointer"
             (click)="generateDialogOpen = false"
           >
             Cancel
           </button>
           <button
-            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground cursor-pointer"
             (click)="handleGenerateReport()"
           >
             Generate Report

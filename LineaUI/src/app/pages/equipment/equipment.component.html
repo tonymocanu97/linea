@@ -16,7 +16,7 @@
           </div>
   
           <button
-            class="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            class="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground cursor-pointer"
             (click)="openAddDialog()"
           >
             <lucide-icon [name]="plus" class="h-4 w-4"></lucide-icon>
@@ -91,7 +91,7 @@
   
               <div class="flex gap-2">
                 <button
-                  class="flex flex-1 items-center justify-center gap-1 rounded-md border border-border px-2 py-1.5 text-xs font-medium hover:bg-secondary"
+                  class="flex flex-1 items-center justify-center gap-1 rounded-md border border-border px-2 py-1.5 text-xs font-medium hover:bg-secondary cursor-pointer"
                   (click)="openConfigureDialog(eq)"
                 >
                   <lucide-icon
@@ -99,17 +99,6 @@
                     class="h-3 w-3"
                   ></lucide-icon>
                   Configure
-                </button>
-  
-                <button
-                  class="flex flex-1 items-center justify-center gap-1 rounded-md border border-border px-2 py-1.5 text-xs font-medium hover:bg-secondary"
-                  (click)="openMaintenanceDialog(eq)"
-                >
-                  <lucide-icon
-                    [name]="wrench"
-                    class="h-3 w-3"
-                  ></lucide-icon>
-                  Maintenance
                 </button>
               </div>
             </div>
@@ -179,13 +168,13 @@
 
         <div class="flex justify-end gap-2">
           <button
-            class="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary"
+            class="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary cursor-pointer"
             (click)="addDialogOpen = false"
           >
             Cancel
           </button>
           <button
-            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground cursor-pointer"
             (click)="handleAddEquipment()"
           >
             Add Equipment
@@ -239,57 +228,16 @@
 
         <div class="flex justify-end gap-2">
           <button
-            class="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary"
+            class="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary cursor-pointer"
             (click)="configureDialogOpen = false"
           >
             Cancel
           </button>
           <button
-            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground cursor-pointer"
             (click)="handleConfigure()"
           >
             Save Changes
-          </button>
-        </div>
-      </div>
-    </app-modal>
-
-    <app-modal [(isOpen)]="maintenanceDialogOpen">
-      <div class="space-y-4">
-        <div>
-          <h2 class="text-lg font-semibold text-foreground">Schedule Maintenance</h2>
-          <p class="text-sm text-muted-foreground">Set {{ selectedEquipment?.name }} to maintenance mode</p>
-        </div>
-
-        <div class="space-y-4">
-          <div class="space-y-2">
-            <label class="text-sm font-medium text-foreground" for="maintenance-note">Maintenance Notes (optional)</label>
-            <input
-              id="maintenance-note"
-              type="text"
-              class="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              placeholder="e.g., Scheduled oil change"
-              [(ngModel)]="maintenanceNote"
-            />
-          </div>
-
-          <p class="text-sm text-muted-foreground">
-            This will set the equipment status to "maintenance" and notify relevant personnel.
-          </p>
-        </div>
-
-        <div class="flex justify-end gap-2">
-          <button
-            class="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary"
-            (click)="maintenanceDialogOpen = false"
-          >
-            Cancel
-          </button>
-          <button
-            class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            (click)="handleMaintenance()"
-          >
-            Start Maintenance
           </button>
         </div>
       </div>

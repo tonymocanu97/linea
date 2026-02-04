@@ -10,10 +10,12 @@
       <p class="text-sm text-muted-foreground">
         {{ alerts.length }} unresolved issues
       </p>
-    </div>
+    </div> 
 
     <button
-      class="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+      class="text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
+      routerLink="/alerts"
+      routerLinkActive="text-primary"
     >
       View All
     </button>
