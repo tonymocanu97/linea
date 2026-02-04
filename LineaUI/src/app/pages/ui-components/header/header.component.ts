@@ -12,6 +12,7 @@ import { SettingsService } from '@shared';
 export class HeaderComponent implements OnInit, OnDestroy {
   currentTime = '';
   currentDate = '';
+  notificationsOpen = false;
   searchOpen = false;
   private timeInterval?: number;
   private timezoneOffset = 2;

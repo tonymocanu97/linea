@@ -16,25 +16,25 @@
     </div>
 
     <div class="relative">
-    <button
+      <button
         type="button"
-      class="flex h-9 items-center gap-2 rounded-lg border border-border bg-secondary/50 px-3 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        class="flex h-9 items-center gap-2 rounded-lg border border-border bg-secondary/50 px-3 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         (click)="searchOpen = true"
         aria-label="Open search"
-    >
-      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
-      <span class="hidden md:inline">Search...</span>
-      <kbd class="hidden rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium md:inline">
-        ⌘K
-      </kbd>
-    </button>
+      >
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+        <span class="hidden md:inline">Search...</span>
+        <kbd class="hidden rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium md:inline">
+          ⌘K
+        </kbd>
+      </button>
 
       @if (searchOpen) {
         <div
@@ -51,23 +51,39 @@
     </div>
 
     <div class="relative">
-    <button
-      class="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border transition-colors hover:bg-secondary"
-    >
-      <svg class="h-4 w-4 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-        />
-      </svg>
-      <span
-        class="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground"
+      <button
+        type="button"
+        class="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border transition-colors hover:bg-secondary"
+        (click)="notificationsOpen = true"
+        aria-label="Open notifications"
       >
-        3
-      </span>
-    </button>
+        <svg class="h-4 w-4 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+          />
+        </svg>
+      </button>
+
+      @if (notificationsOpen) {
+        <div
+          class="fixed inset-0 z-40"
+          (click)="notificationsOpen = false"
+          aria-hidden="true"
+        ></div>
+        <div
+          class="absolute right-0 top-full z-50 mt-2 w-80 rounded-lg border border-border bg-card p-4 shadow-lg"
+          (click)="$event.stopPropagation()"
+          role="dialog"
+          aria-label="Notifications"
+        >
+          <h2 class="text-lg font-semibold text-foreground">Notifications</h2>
+          <p class="mt-1 text-sm text-muted-foreground">You have 0 unread notifications.</p>
+        </div>
+      }
+    </div>
 
     <button
       class="flex items-center gap-2 rounded-lg border border-border px-2 py-1.5 transition-colors hover:bg-secondary"
