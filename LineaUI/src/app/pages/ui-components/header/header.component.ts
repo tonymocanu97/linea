@@ -1,15 +1,18 @@
 import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { SearchDialogComponent } from '../search-dialog/search-dialog.component';
 import { SettingsService } from '@shared';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SearchDialogComponent],
   templateUrl: './header.component.html',
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   currentTime = '';
   currentDate = '';
+  searchOpen = false;
   private timeInterval?: number;
   private timezoneOffset = 2;
 
@@ -39,6 +42,21 @@ export class HeaderComponent implements OnInit, OnDestroy {
         });
       }, 1000);
     });
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
+      event.preventDefault();
+      this.searchOpen = true;
+    }
+    if (event.key === 'Escape' && this.searchOpen) {
+      this.searchOpen = false;
+    }
+  }
+
+  openSearch(): void {
+    this.searchOpen = true;
   }
 
   ngOnDestroy() {

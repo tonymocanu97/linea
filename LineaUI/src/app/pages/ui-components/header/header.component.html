@@ -15,8 +15,12 @@
       <span class="font-mono text-sm text-primary">{{ currentTime }}</span>
     </div>
 
+    <div class="relative">
     <button
+        type="button"
       class="flex h-9 items-center gap-2 rounded-lg border border-border bg-secondary/50 px-3 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        (click)="searchOpen = true"
+        aria-label="Open search"
     >
       <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
@@ -32,6 +36,21 @@
       </kbd>
     </button>
 
+      @if (searchOpen) {
+        <div
+          class="fixed inset-0 z-40"
+          (click)="searchOpen = false"
+          aria-hidden="true"
+        ></div>
+        <app-search-dialog
+          [open]="searchOpen"
+          (openChange)="searchOpen = $event"
+          class="absolute right-0 top-full z-50 mt-2"
+        ></app-search-dialog>
+      }
+    </div>
+
+    <div class="relative">
     <button
       class="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border transition-colors hover:bg-secondary"
     >

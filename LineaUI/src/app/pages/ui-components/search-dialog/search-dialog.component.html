@@ -1,0 +1,138 @@
+@if (open) {
+  <div
+    class="w-96 rounded-lg border border-border bg-card shadow-lg"
+    (click)="$event.stopPropagation()"
+    role="dialog"
+    aria-label="Search"
+  >
+      <div class="border-b border-border p-4">
+        <div class="relative flex items-center gap-2">
+          <svg
+            class="absolute left-3 h-4 w-4 text-muted-foreground"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearchChange($event)"
+            placeholder="Search equipment, alerts, users, reports..."
+            class="w-full rounded-md border border-border bg-background px-10 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            autofocus
+          />
+          <kbd
+            class="hidden rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium md:inline"
+          >
+            ESC
+          </kbd>
+        </div>
+      </div>
+
+      <div class="max-h-[400px] overflow-y-auto p-2">
+        @if (loading && !searchQuery) {
+          <div class="py-8 text-center text-sm text-muted-foreground">
+            Loading...
+          </div>
+        } @else if (!hasResults && searchQuery) {
+          <div class="py-8 text-center text-sm text-muted-foreground">
+            No results found.
+          </div>
+        } @else if (hasResults) {
+          @if (filteredResults.pages.length > 0) {
+            <div class="mb-4">
+              <h3 class="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Pages
+              </h3>
+              @for (item of filteredResults.pages; track item.id) {
+                <button
+                  (click)="handleSelect(item.path)"
+                  class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-secondary cursor-pointer"
+                >
+                  <lucide-icon
+                    [name]="item.icon"
+                    class="h-4 w-4 text-muted-foreground"
+                  ></lucide-icon>
+                  <span>{{ item.name }}</span>
+                </button>
+              }
+            </div>
+          }
+
+          @if (filteredResults.equipment.length > 0) {
+            <div class="mb-4">
+              <h3 class="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Equipment
+              </h3>
+              @for (item of filteredResults.equipment; track item.id) {
+                <button
+                  (click)="handleSelect(item.path)"
+                  class="flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-secondary cursor-pointer"
+                >
+                  <div class="flex items-center gap-2">
+                    <lucide-icon
+                      [name]="cpu"
+                      class="h-4 w-4 text-muted-foreground"
+                    ></lucide-icon>
+                    <span>{{ item.name }}</span>
+                  </div>
+                  <span
+                    [class]="'text-xs ' + (item.status === 'running' ? 'text-success' : item.status === 'maintenance' ? 'text-warning' : 'text-muted-foreground')"
+                  >
+                    {{ item.status }}
+                  </span>
+                </button>
+              }
+            </div>
+          }
+
+          @if (filteredResults.alerts.length > 0) {
+            <div class="mb-4">
+              <h3 class="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Alerts
+              </h3>
+              @for (item of filteredResults.alerts; track item.id) {
+                <button
+                  (click)="handleSelect(item.path)"
+                  class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-secondary cursor-pointer"
+                >
+                  <lucide-icon
+                    [name]="alertTriangle"
+                    [class]="'h-4 w-4 ' + (item.severity === 'error' ? 'text-destructive' : item.severity === 'warning' ? 'text-warning' : 'text-primary')"
+                  ></lucide-icon>
+                  <span>{{ item.name }}</span>
+                </button>
+              }
+            </div>
+          }
+
+          @if (filteredResults.reports.length > 0) {
+            <div class="mb-4">
+              <h3 class="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Reports
+              </h3>
+              @for (item of filteredResults.reports; track item.id) {
+                <button
+                  (click)="handleSelect(item.path)"
+                  class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-secondary cursor-pointer"
+                >
+                  <lucide-icon
+                    [name]="fileText"
+                    class="h-4 w-4 text-muted-foreground"
+                  ></lucide-icon>
+                  <span>{{ item.name }}</span>
+                </button>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+}
