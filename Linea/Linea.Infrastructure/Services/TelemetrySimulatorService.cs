@@ -1,4 +1,4 @@
-﻿using Linea.Domain.Entities;
+using Linea.Domain.Entities;
 using Linea.Domain.Enums;
 using Linea.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -84,13 +84,13 @@ namespace Linea.Infrastructure.Services
 
                 report.GoodCount += lineName switch
                 {
-                    "Line A" => _rng.Next(10, 35),
-                    "Line B" => _rng.Next(7, 28),
-                    "Line C" => _rng.Next(5, 22),
-                    _ => _rng.Next(5, 20)
+                    "Line A" => _rng.Next(0, 3),
+                    "Line B" => _rng.Next(0, 2),
+                    "Line C" => _rng.Next(0, 2),
+                    _ => _rng.Next(0, 2)
                 };
 
-                report.ScrapCount += _rng.NextDouble() < 0.7 ? _rng.Next(0, 3) : _rng.Next(0, 6);
+                report.ScrapCount += _rng.NextDouble() < 0.8 ? _rng.Next(0, 1) : _rng.Next(0, 2);
 
                 if (_rng.NextDouble() < 0.25)
                 {
@@ -106,12 +106,15 @@ namespace Linea.Infrastructure.Services
 
                 if (_rng.NextDouble() < 0.15)
                 {
+                    var reason = DowntimeReasons[_rng.Next(DowntimeReasons.Length)];
+                    var isOpenAlert = _rng.NextDouble() < 0.4;
                     var downtime = new Downtime
                     {
                         ProductionReportId = report.Id,
                         StartTime = DateTime.UtcNow.AddMinutes(-_rng.Next(2, 15)),
-                        EndTime = DateTime.UtcNow,
-                        Reason = DowntimeReasons[_rng.Next(DowntimeReasons.Length)],
+                        EndTime = isOpenAlert ? null : DateTime.UtcNow,
+                        Type = reason.Contains("Repair") ? "Breakdown" : reason.Contains("Maintenance") ? "Planned Maintenance" : "Other",
+                        Reason = reason,
                     };
                     database.Downtimes.Add(downtime);
                 }

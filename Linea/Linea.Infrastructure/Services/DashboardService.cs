@@ -2,6 +2,7 @@ using Linea.Application.DTOs;
 using Linea.Application.DTOs.Dashboard;
 using Linea.Application.Interfaces;
 using Linea.Domain.Entities;
+using Linea.Domain.Enums;
 using Linea.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -212,31 +213,46 @@ namespace Linea.Infrastructure.Services
                 .Include(e => e.ProductionReports)
                 .ToListAsync(cancellationToken);
 
+            var now = DateTime.UtcNow;
+            var currentShift = GetCurrentShift(now);
+            var todayStart = now.Date;
+
             var result = equipmentWithReports
-                .Select(e => 
+                .Select(e =>
                 {
-                    var reports = e.ProductionReports;
-                    
+                    var reports = e.ProductionReports
+                        .Where(r => r.Date >= todayStart && r.Date < todayStart.AddDays(1) && r.Shift == currentShift)
+                        .ToList();
+
                     if (!string.IsNullOrWhiteSpace(lineName))
                     {
                         reports = reports.Where(r => r.LineName == lineName).ToList();
                     }
 
                     var actualProduction = reports.Sum(r => r.GoodCount + r.ScrapCount);
-                    var efficiency = e.TargetProductionRate == 0 ? 0 : (int)Math.Round((double)actualProduction * 100.0 / e.TargetProductionRate);
+                    var target = e.TargetProductionRate > 0 ? e.TargetProductionRate : 40000;
+                    var efficiency = (int)Math.Round((double)actualProduction * 100.0 / target);
 
                     return new EquipmentStatusDto(
                         Id: e.Id.ToString(),
                         Name: e.Name,
                         Status: e.Status,
                         ActualProductionRate: actualProduction,
-                        TargetProductionRate: e.TargetProductionRate,
+                        TargetProductionRate: e.TargetProductionRate > 0 ? e.TargetProductionRate : target,
                         EfficiencyPercentage: efficiency
                     );
                 })
                 .ToList();
 
             return result;
+        }
+
+        private static ShiftType GetCurrentShift(DateTime utcNow)
+        {
+            var hour = utcNow.Hour;
+            if (hour < 8) return ShiftType.Shift1;
+            if (hour < 16) return ShiftType.Shift2;
+            return ShiftType.Shift3;
         }
 
         public async Task<EquipmentDto> AddEquipmentAsync(CreateEquipmentDto equipment, CancellationToken cancellationToken = default)
