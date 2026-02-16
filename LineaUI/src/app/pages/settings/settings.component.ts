@@ -1,18 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent, SidebarComponent } from '@components';
-import { SettingsService } from '@shared';
+import { SettingsService } from '@shared/services';
 import { LucideAngularModule, Settings } from 'lucide-angular';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [
-    LucideAngularModule,
-    SidebarComponent,
-    HeaderComponent,
-    FormsModule,
-  ],
+  imports: [LucideAngularModule, SidebarComponent, HeaderComponent, FormsModule],
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent implements OnInit {
@@ -31,7 +26,7 @@ export class SettingsComponent implements OnInit {
 
   save(): void {
     this.saving = true;
-    
+
     this.settingsService.setCompanyName(this.companyName);
     this.settingsService.setTimezone(this.timezone);
 

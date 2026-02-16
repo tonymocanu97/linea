@@ -1,28 +1,13 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent, SidebarComponent } from '@components';
-import { DashboardApiService, EquipmentStatus, ModalComponent } from '@shared';
-import {
-  Cpu,
-  LucideAngularModule,
-  Plus,
-  Settings,
-  Wrench,
-} from 'lucide-angular';
-
-interface NewEquipment {
-  id: string;
-  name: string;
-  status: EquipmentStatus['status'];
-  targetProductionRate: number;
-}
-
-interface ConfigureForm {
-  name: string;
-  status: EquipmentStatus['status'];
-  targetProductionRate: number;
-}
+import { ModalComponent } from '@shared/modals';
+import { DashboardApiService, EquipmentStatus } from '@shared/services';
+import { Cpu, LucideAngularModule, Plus, Settings, Wrench } from 'lucide-angular';
+import { EQUIPMENT_BADGE_CLASSES } from './constants';
+import { ConfigureForm, NewEquipment } from './models';
+import { calculateUptime, validateNewEquipment } from './utils';
 
 @Component({
   selector: 'app-equipment',
@@ -38,6 +23,7 @@ interface ConfigureForm {
     ModalComponent,
   ],
   templateUrl: './equipment.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EquipmentComponent {
   cpu = Cpu;
@@ -87,21 +73,11 @@ export class EquipmentComponent {
   }
 
   getUptime(equipment: EquipmentStatus): string {
-    const uptime = Math.min(99.9, equipment.efficiencyPercentage * 1.1);
-    return `${uptime.toFixed(1)}%`;
+    return calculateUptime(equipment);
   }
 
   badgeClass(status: EquipmentStatus['status']): string {
-    switch (status) {
-      case 'running':
-        return 'bg-success text-success-foreground';
-      case 'maintenance':
-        return 'bg-secondary text-secondary-foreground';
-      case 'error':
-        return 'bg-destructive text-destructive-foreground';
-      default:
-        return 'bg-transparent border border-border text-muted-foreground';
-    }
+    return EQUIPMENT_BADGE_CLASSES[status];
   }
 
   openAddDialog(): void {
@@ -125,19 +101,16 @@ export class EquipmentComponent {
   }
 
   handleAddEquipment(): void {
-    if (!this.newEquipment.id || !this.newEquipment.name) {
-      alert('Please fill in all required fields');
-      return;
-    }
+    const validationError = validateNewEquipment(this.newEquipment, this.equipmentList);
 
-    if (this.equipmentList.find((eq) => eq.id === this.newEquipment.id)) {
-      alert('Equipment ID already exists');
+    if (validationError) {
+      alert(validationError);
       return;
     }
 
     this.api.addEquipment(this.newEquipment).subscribe({
       next: (newEq) => {
-        this.equipmentList.push(newEq);
+        this.equipmentList = [...this.equipmentList, newEq];
         this.addDialogOpen = false;
         alert(`${newEq.name} has been added`);
       },
@@ -150,10 +123,8 @@ export class EquipmentComponent {
 
     this.api.updateEquipment(this.selectedEquipment.id, this.configForm).subscribe({
       next: (updated) => {
-        const index = this.equipmentList.findIndex(eq => eq.id === this.selectedEquipment!.id);
-        if (index !== -1) {
-          this.equipmentList[index] = updated;
-        }
+        this.equipmentList = this.equipmentList.map((eq) => (eq.id === updated.id ? updated : eq));
+
         this.configureDialogOpen = false;
         alert(`${updated.name} has been updated`);
       },

@@ -1,7 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { DashboardSummary, Downtime, EquipmentStatus, GeneratedReport, GenerateReportRequest, HourlyProductionPoint } from '@shared';
 import { Observable } from 'rxjs';
+import {
+  DashboardSummary,
+  Downtime,
+  EquipmentStatus,
+  GeneratedReport,
+  GenerateReportRequest,
+  HourlyProductionPoint,
+} from './models';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +29,7 @@ export class DashboardApiService {
   getHourlyProduction(
     from: string,
     to: string,
-    lineName?: string
+    lineName?: string,
   ): Observable<HourlyProductionPoint[]> {
     let params = new HttpParams().set('from', from).set('to', to);
     if (lineName && lineName.trim().length > 0) {
@@ -70,18 +77,15 @@ export class DashboardApiService {
       name?: string;
       status?: EquipmentStatus['status'];
       targetProductionRate?: number;
-    }
+    },
   ): Observable<EquipmentStatus> {
     return this.http.patch<EquipmentStatus>(`${this.baseUrl}/equipment/${equipmentId}`, updates);
   }
 
-  setMaintenanceMode(
-    equipmentId: string,
-    data: { note?: string }
-  ): Observable<EquipmentStatus> {
+  setMaintenanceMode(equipmentId: string, data: { note?: string }): Observable<EquipmentStatus> {
     return this.http.post<EquipmentStatus>(
       `${this.baseUrl}/equipment/${equipmentId}/maintenance`,
-      data
+      data,
     );
   }
 
@@ -99,7 +103,7 @@ export class DashboardApiService {
 
   downloadGeneratedReport(reportId: string): Observable<Blob> {
     return this.http.get(`/api/generatedreports/${reportId}/download`, {
-      responseType: 'blob'
+      responseType: 'blob',
     });
   }
 }

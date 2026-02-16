@@ -1,59 +1,29 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { AlertsBadgeService, SettingsService } from '@shared';
-import {
-  Activity,
-  ChartColumn,
-  Cpu,
-  Factory,
-  FileText,
-  LayoutDashboard,
-  LucideAngularModule,
-  Settings,
-  TriangleAlert,
-  Users,
-} from 'lucide-angular';
-
-interface NavItem {
-  label: string;
-  icon: any;
-  route?: string;
-  badge?: number;
-  comingSoon?: boolean;
-}
+import { AlertsBadgeService, SettingsService } from '@shared/services';
+import { Factory, LucideAngularModule } from 'lucide-angular';
+import { Subject, takeUntil } from 'rxjs';
+import { MANAGEMENT_NAV, OVERVIEW_NAV, PRODUCTION_NAV } from './constants';
+import { NavItem } from './models';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
   imports: [RouterModule, NgFor, NgIf, LucideAngularModule],
   templateUrl: './sidebar.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SidebarComponent implements OnInit {
-  layoutDashboard = LayoutDashboard;
-  activity = Activity;
-  fileText = FileText;
-  settings = Settings;
-  users = Users;
-  alertTriangle = TriangleAlert;
-  barChart = ChartColumn;
-  cpu = Cpu;
-  factory = Factory;
+export class SidebarComponent implements OnInit, OnDestroy {
+  overviewItems: NavItem[] = OVERVIEW_NAV;
+  productionItems: NavItem[] = PRODUCTION_NAV;
+  managementItems: NavItem[] = MANAGEMENT_NAV;
 
   alertsBadgeCount = 0;
+  factory = Factory;
   companyName = 'Production Form';
 
-  overviewItems: NavItem[] = [
-    { label: 'Dashboard', icon: this.layoutDashboard, route: '/dashboard' },
-    { label: 'Real-time Monitor', icon: this.activity, comingSoon: true },
-    { label: 'Analytics', icon: this.barChart, route: '/analytics' },
-  ];
-
-  productionItems: NavItem[] = [
-    { label: 'Equipment', icon: this.cpu, route: '/equipment' },
-    { label: 'Reports', icon: this.fileText, route: '/reports' },
-    { label: 'Alerts', icon: this.alertTriangle, route: '/alerts' },
-  ];
+  private destroy$ = new Subject<void>();
 
   constructor(
     private alertsBadge: AlertsBadgeService,
@@ -62,10 +32,14 @@ export class SidebarComponent implements OnInit {
 
   ngOnInit(): void {
     this.alertsBadge.load();
-    this.alertsBadge.badgeCount$.subscribe((count) => (this.alertsBadgeCount = count));
-    
+
+    this.alertsBadge.badgeCount$.pipe(takeUntil(this.destroy$)).subscribe((count) => {
+      this.alertsBadgeCount = count;
+    });
+
     this.companyName = this.settingsService.getCompanyName();
-    this.settingsService.companyName$.subscribe((name) => {
+
+    this.settingsService.companyName$.pipe(takeUntil(this.destroy$)).subscribe((name) => {
       this.companyName = name;
     });
   }
@@ -74,15 +48,16 @@ export class SidebarComponent implements OnInit {
     if (item.route === '/alerts') {
       return this.alertsBadgeCount;
     }
+
     return item.badge;
   }
 
-  managementItems: NavItem[] = [
-    { label: 'Users', icon: this.users, comingSoon: true },
-    { label: 'Settings', icon: this.settings, route: '/settings' },
-  ];
-
-  showComingSoon() {
+  showComingSoon(): void {
     alert('🚧 Coming soon');
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

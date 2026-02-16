@@ -1,34 +1,47 @@
 import { DatePipe, NgFor, NgIf } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent, SidebarComponent } from '@components';
-import { DashboardApiService, EquipmentStatus, GeneratedReport, GenerateReportRequest, ModalComponent } from '@shared';
+import { ModalComponent } from '@shared/modals';
+import {
+  DashboardApiService,
+  EquipmentStatus,
+  GeneratedReport,
+  GenerateReportRequest,
+} from '@shared/services';
 import { Calendar, Download, FileText, LucideAngularModule, Plus } from 'lucide-angular';
+import { createEmptyReportRequest } from './models';
+import { buildFilterSummary, downloadBlob } from './utils';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [LucideAngularModule, HeaderComponent, SidebarComponent, ModalComponent, NgFor, NgIf, FormsModule, DatePipe],
+  imports: [
+    LucideAngularModule,
+    HeaderComponent,
+    SidebarComponent,
+    NgFor,
+    NgIf,
+    FormsModule,
+    DatePipe,
+    ModalComponent,
+  ],
   templateUrl: './reports.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportsComponent {
   plus = Plus;
   fileText = FileText;
   calendar = Calendar;
   download = Download;
-  
+
   reports: GeneratedReport[] = [];
   equipmentList: EquipmentStatus[] = [];
   loading = false;
   error?: string;
   generateDialogOpen = false;
 
-  reportRequest: GenerateReportRequest = {
-    date: undefined,
-    shift: null,
-    lineName: undefined,
-    equipmentId: undefined
-  };
+  reportRequest: GenerateReportRequest = createEmptyReportRequest();
 
   constructor(private api: DashboardApiService) {
     this.loadReports();
@@ -63,26 +76,14 @@ export class ReportsComponent {
   }
 
   openGenerateDialog(): void {
-    this.reportRequest = {
-      date: undefined,
-      shift: null,
-      lineName: undefined,
-      equipmentId: undefined
-    };
+    this.reportRequest = createEmptyReportRequest();
     this.generateDialogOpen = true;
   }
 
   handleGenerateReport(): void {
-    const request: GenerateReportRequest = {
-      date: this.reportRequest.date,
-      shift: this.reportRequest.shift,
-      lineName: this.reportRequest.lineName,
-      equipmentId: this.reportRequest.equipmentId
-    };
-
-    this.api.createGeneratedReport(request).subscribe({
+    this.api.createGeneratedReport(this.reportRequest).subscribe({
       next: (created) => {
-        this.reports.unshift(created);
+        this.reports = [created, ...this.reports];
         this.generateDialogOpen = false;
       },
       error: () => {
@@ -94,12 +95,9 @@ export class ReportsComponent {
   downloadReport(report: GeneratedReport): void {
     this.api.downloadGeneratedReport(report.id).subscribe({
       next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `report-${new Date(report.createdAt).toISOString().split('T')[0]}.csv`;
-        link.click();
-        window.URL.revokeObjectURL(url);
+        const filename = `report-${new Date(report.createdAt).toISOString().split('T')[0]}.csv`;
+
+        downloadBlob(blob, filename);
       },
       error: () => {
         alert('Failed to download report');
@@ -108,11 +106,6 @@ export class ReportsComponent {
   }
 
   getFilterSummary(report: GeneratedReport): string {
-    const parts: string[] = [];
-    if (report.dateFilter) parts.push(report.dateFilter.split('T')[0]);
-    if (report.shiftFilter) parts.push(`Shift ${report.shiftFilter}`);
-    if (report.lineNameFilter) parts.push(report.lineNameFilter);
-    if (report.equipmentName) parts.push(report.equipmentName);
-    return parts.length > 0 ? parts.join(' | ') : 'All Data';
+    return buildFilterSummary(report);
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { DashboardApiService, Downtime } from '@shared';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { DashboardApiService } from './dashboard-api.service';
+import { Downtime } from './models';
 
 @Injectable({
   providedIn: 'root',

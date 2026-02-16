@@ -14,7 +14,7 @@ export class SettingsService {
   constructor() {
     const savedCompanyName = localStorage.getItem('companyName');
     const savedTimezone = localStorage.getItem('timezone');
-    
+
     if (savedCompanyName) {
       this.companyNameSubject.next(savedCompanyName);
     }

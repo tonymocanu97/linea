@@ -1,19 +1,32 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { SearchDialogComponent } from '../search-dialog/search-dialog.component';
-import { SettingsService } from '@shared';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  NgZone,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
+import { SettingsService } from '@shared/services';
+import { formatDate, formatTime, getTargetTime } from '@shared/utils';
+import { Subject, takeUntil } from 'rxjs';
+import { SearchDialogComponent } from './components';
 
 @Component({
   selector: 'app-header',
   standalone: true,
   imports: [CommonModule, SearchDialogComponent],
   templateUrl: './header.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   currentTime = '';
   currentDate = '';
   notificationsOpen = false;
   searchOpen = false;
+
+  private destroy$ = new Subject<void>();
   private timeInterval?: number;
   private timezoneOffset = 2;
 
@@ -23,22 +36,20 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private settingsService: SettingsService,
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.timezoneOffset = this.settingsService.getTimezoneOffset();
-    
-    this.settingsService.timezone$.subscribe(() => {
+
+    this.settingsService.timezone$.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.timezoneOffset = this.settingsService.getTimezoneOffset();
-      this.updateTime();
-      this.updateDate();
+      this.updateDateTime();
     });
 
-    this.updateTime();
-    this.updateDate();
+    this.updateDateTime();
 
     this.ngZone.runOutsideAngular(() => {
       this.timeInterval = window.setInterval(() => {
         this.ngZone.run(() => {
-          this.updateTime();
+          this.updateDateTime();
           this.cdr.markForCheck();
         });
       }, 1000);
@@ -51,6 +62,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       event.preventDefault();
       this.searchOpen = true;
     }
+
     if (event.key === 'Escape' && this.searchOpen) {
       this.searchOpen = false;
     }
@@ -60,35 +72,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.searchOpen = true;
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     if (this.timeInterval) {
       clearInterval(this.timeInterval);
     }
+
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  private updateTime() {
-    const now = new Date();
-    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const targetTime = new Date(utcTime + (this.timezoneOffset * 3600000));
-    
-    this.currentTime = targetTime.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    });
-  }
-
-  private updateDate() {
-    const now = new Date();
-    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const targetTime = new Date(utcTime + (this.timezoneOffset * 3600000));
-    
-    this.currentDate = targetTime.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+  private updateDateTime(): void {
+    const target = getTargetTime(this.timezoneOffset);
+    this.currentTime = formatTime(target);
+    this.currentDate = formatDate(target);
   }
 }
