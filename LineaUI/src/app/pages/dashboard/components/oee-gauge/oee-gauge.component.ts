@@ -14,6 +14,7 @@ export class OeeGaugeComponent {
   @Input({ required: true }) value!: number;
   @Input({ required: true }) label!: string;
   @Input() color: OEEGaugeColor = 'primary';
+  @Input() tooltip = '';
 
   readonly radius = 45;
   readonly circumference = 2 * Math.PI * this.radius;

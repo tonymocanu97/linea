@@ -21,10 +21,30 @@
         </div>
 
         <div class="flex flex-wrap items-center justify-around gap-6">
-          <app-oee-gauge [value]="metrics.oee" label="Overall OEE" color="primary" />
-          <app-oee-gauge [value]="metrics.availability" label="Availability" color="success" />
-          <app-oee-gauge [value]="metrics.performance" label="Performance" color="warning" />
-          <app-oee-gauge [value]="metrics.quality" label="Quality" color="success" />
+          <app-oee-gauge
+            [value]="metrics.oee"
+            label="Overall OEE"
+            color="primary"
+            [tooltip]="oeeTooltips.oee"
+          />
+          <app-oee-gauge
+            [value]="metrics.availability"
+            label="Availability"
+            color="success"
+            [tooltip]="oeeTooltips.availability"
+          />
+          <app-oee-gauge
+            [value]="metrics.performance"
+            label="Performance"
+            color="warning"
+            [tooltip]="oeeTooltips.performance"
+          />
+          <app-oee-gauge
+            [value]="metrics.quality"
+            label="Quality"
+            color="success"
+            [tooltip]="oeeTooltips.quality"
+          />
         </div>
       </div>
 

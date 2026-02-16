@@ -59,6 +59,16 @@ export class DashboardComponent {
 
   equipmentStatusData: EquipmentStatus[] = [];
 
+  readonly oeeTooltips = {
+    oee: 'Overall Equipment Effectiveness. Formula: Availability × Performance × Quality. Measures how well equipment is utilized compared to its full potential.',
+    availability:
+      'Availability: % of planned production time the equipment was running. Formula: ((Planned minutes − Downtime) / Planned minutes) × 100.',
+    performance:
+      'Performance: % of target production achieved. Formula: (Actual production / Target) × 100, capped at 100%. Target = days in range × 2000 units.',
+    quality:
+      'Quality: % of good units vs total produced. Formula: (Good units / Total produced) × 100.',
+  };
+
   get totalOutput(): number {
     return (this.summary?.totalGood ?? 0) + (this.summary?.totalScrap ?? 0);
   }
