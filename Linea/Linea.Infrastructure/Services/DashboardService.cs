@@ -233,10 +233,12 @@ namespace Linea.Infrastructure.Services
                     var target = e.TargetProductionRate > 0 ? e.TargetProductionRate : 40000;
                     var efficiency = (int)Math.Round((double)actualProduction * 100.0 / target);
 
+                    var status = GetEffectiveStatus(e.Status, actualProduction);
+
                     return new EquipmentStatusDto(
                         Id: e.Id.ToString(),
                         Name: e.Name,
-                        Status: e.Status,
+                        Status: status,
                         ActualProductionRate: actualProduction,
                         TargetProductionRate: e.TargetProductionRate > 0 ? e.TargetProductionRate : target,
                         EfficiencyPercentage: efficiency
@@ -253,6 +255,16 @@ namespace Linea.Infrastructure.Services
             if (hour < 8) return ShiftType.Shift1;
             if (hour < 16) return ShiftType.Shift2;
             return ShiftType.Shift3;
+        }
+
+        private static string GetEffectiveStatus(string storedStatus, int actualProduction)
+        {
+            var status = storedStatus?.Trim().ToLowerInvariant() ?? string.Empty;
+            if (status == "maintenance" || status == "error")
+                return status;
+            if (actualProduction > 0)
+                return "running";
+            return "idle";
         }
 
         public async Task<EquipmentDto> AddEquipmentAsync(CreateEquipmentDto equipment, CancellationToken cancellationToken = default)
