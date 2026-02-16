@@ -15,7 +15,7 @@ export function calculateMaxValue(data: ChartPoint[]): number {
 }
 
 export function calculateXStep(dataLength: number, width: number, padding: number): number {
-  if (dataLength <= 1) return 0;
+  if (dataLength <= 1) return width - padding * 2;
   return (width - padding * 2) / (dataLength - 1);
 }
 
@@ -39,15 +39,22 @@ export function buildLinePath(
 ): string {
   if (!values?.length) return '';
 
-  const xStep = calculateXStep(dataLength, width, padding);
+  const effectiveLength = Math.max(dataLength, 2);
+  const xStep = calculateXStep(effectiveLength, width, padding);
+  const safeMax = maxValue > 0 ? maxValue : 1;
 
-  return values
-    .map((value, index) => {
-      const x = getX(index, xStep, padding);
-      const y = getY(value, maxValue, height, padding);
-      return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-    })
-    .join(' ');
+  const points = values.map((value, index) => {
+    const safeValue = Number.isFinite(value) ? value : 0;
+    const x = getX(index, xStep, padding);
+    const y = getY(safeValue, safeMax, height, padding);
+    return { x, y };
+  });
+
+  if (points.length === 1) {
+    return `M ${padding} ${points[0].y} L ${width - padding} ${points[0].y}`;
+  }
+
+  return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
 }
 
 export function buildAreaPath(
@@ -61,11 +68,12 @@ export function buildAreaPath(
   if (!values?.length) return '';
 
   const line = buildLinePath(values, dataLength, width, height, padding, maxValue);
+  if (!line) return '';
 
-  const xStep = calculateXStep(dataLength, width, padding);
-
-  const lastX = getX(dataLength - 1, xStep, padding);
-
+  const effectiveLength = Math.max(dataLength, 2);
+  const xStep = calculateXStep(effectiveLength, width, padding);
+  const lastIndex = dataLength === 1 ? 1 : dataLength - 1;
+  const lastX = getX(lastIndex, xStep, padding);
   const baseY = height - padding;
 
   return `${line} L ${lastX} ${baseY} L ${padding} ${baseY} Z`;

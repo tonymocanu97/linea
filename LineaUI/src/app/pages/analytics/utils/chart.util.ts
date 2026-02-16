@@ -32,10 +32,12 @@ export function getEnergyLinePath(
   maxEnergyValue: number,
 ): string {
   if (energyData.length === 0) return '';
+  const safeMax = maxEnergyValue > 0 ? maxEnergyValue : 1;
+  const divisor = Math.max(energyData.length - 1, 1);
   return energyData
     .map((d, i) => {
-      const x = 50 + (i * 330) / (energyData.length - 1);
-      const y = 220 - (d.consumption / maxEnergyValue) * 190;
+      const x = 50 + (i * 330) / divisor;
+      const y = 220 - (d.consumption / safeMax) * 190;
       return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
     })
     .join(' ');
@@ -46,10 +48,12 @@ export function getEnergyAreaPath(
   maxEnergyValue: number,
 ): string {
   if (energyData.length === 0) return '';
+  const safeMax = maxEnergyValue > 0 ? maxEnergyValue : 1;
+  const divisor = Math.max(energyData.length - 1, 1);
   let path = 'M 50 220';
   energyData.forEach((d, i) => {
-    const x = 50 + (i * 330) / (energyData.length - 1);
-    const y = 220 - (d.consumption / maxEnergyValue) * 190;
+    const x = 50 + (i * 330) / divisor;
+    const y = 220 - (d.consumption / safeMax) * 190;
     path += ` L ${x} ${y}`;
   });
   path += ' L 380 220 Z';
