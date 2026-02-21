@@ -7,7 +7,7 @@ namespace Linea.Application.DTOs
         DateTime Date,
         ShiftType Shift,
         string LineName,
-        string EquipmentName,
+        Guid EquipmentId,
         int GoodCount,
         int ScrapCount,
         string? Notes

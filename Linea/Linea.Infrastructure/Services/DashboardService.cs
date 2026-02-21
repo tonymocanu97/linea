@@ -2,6 +2,7 @@ using Linea.Application.DTOs;
 using Linea.Application.DTOs.Dashboard;
 using Linea.Application.Interfaces;
 using Linea.Domain.Entities;
+using Linea.Domain.Enums;
 using Linea.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,9 +42,39 @@ namespace Linea.Infrastructure.Services
                 })
                 .FirstOrDefaultAsync(cancellationToken) ?? new { Good = 0, Scrap = 0 };
 
-            var totalDowntime = await _database.Downtimes.AsNoTracking()
-                .Where(d => reportIds.Contains(d.ProductionReportId))
-                .SumAsync(d => (int)Math.Max(0, (d.EndTime - d.StartTime).TotalMinutes), cancellationToken);
+            var fromDateTime = from.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            var toDateTime = to.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc);
+            
+            var downtimeQuery = _database.Downtimes.AsNoTracking()
+                .Include(d => d.ProductionReport)
+                .ThenInclude(p => p.Equipment)
+                .AsQueryable();
+
+            downtimeQuery = downtimeQuery.Where(d => 
+                (d.EndTime == null || d.EndTime >= fromDateTime) && 
+                d.StartTime <= toDateTime);
+
+            if (!string.IsNullOrWhiteSpace(lineName))
+            {
+                downtimeQuery = downtimeQuery.Where(d => 
+                    d.ProductionReport != null && 
+                    d.ProductionReport.LineName == lineName.Trim());
+            }
+
+            var downtimes = await downtimeQuery.ToListAsync(cancellationToken);
+            
+            var totalDowntime = 0;
+            foreach (var downtime in downtimes)
+            {
+                var startTime = downtime.StartTime < fromDateTime ? fromDateTime : downtime.StartTime;
+                var endTime = downtime.EndTime ?? DateTime.UtcNow;
+                endTime = endTime > toDateTime ? toDateTime : endTime;
+                
+                if (endTime > startTime)
+                {
+                    totalDowntime += (int)Math.Max(0, (endTime - startTime).TotalMinutes);
+                }
+            }
 
             var topDefects = await _database.Defects.AsNoTracking()
                 .Where(d => reportIds.Contains(d.ProductionReportId))
@@ -64,7 +95,7 @@ namespace Linea.Infrastructure.Services
                 TotalGood: totals.Good,
                 TotalScrap: totals.Scrap,
                 ScrapRatePercent: Math.Round(scrapRate, 2),
-                TotalDowntime: totalDowntime,
+                TotalDowntimeMinutes: totalDowntime,
                 TopDefects: topDefects
             );
         }
@@ -105,6 +136,7 @@ namespace Linea.Infrastructure.Services
             var query = _database.Downtimes
                 .AsNoTracking()
                 .Include(d => d.ProductionReport)
+                .ThenInclude(p => p.Equipment)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(lineName))
@@ -123,8 +155,51 @@ namespace Linea.Infrastructure.Services
                 Type: d.Type,
                 Reason: d.Reason,
                 LineName: d.ProductionReport?.LineName ?? string.Empty,
-                EquipmentName: d.ProductionReport?.EquipmentName ?? string.Empty,
-                Duration: (int)Math.Max(0, (d.EndTime - d.StartTime).TotalMinutes)
+                EquipmentName: d.ProductionReport?.Equipment?.Name ?? string.Empty,
+                Duration: (int)Math.Max(0, ((d.EndTime ?? DateTime.UtcNow) - d.StartTime).TotalMinutes)
+            )).ToList();
+
+            return result;
+        }
+
+        public async Task<List<ActiveDowntimeDto>> GetDowntimes(DateOnly from, DateOnly to, string? lineName = null, CancellationToken cancellationToken = default)
+        {
+            if (to < from)
+            {
+                throw new ArgumentException("'to' date must be greater than or equal to 'from' date.");
+            }
+
+            var fromDateTime = from.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+            var toDateTime = to.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc);
+
+            var query = _database.Downtimes
+                .AsNoTracking()
+                .Include(d => d.ProductionReport)
+                .ThenInclude(p => p.Equipment)
+                .AsQueryable();
+
+            query = query.Where(d => 
+                (d.EndTime == null || d.EndTime >= fromDateTime) && 
+                d.StartTime <= toDateTime);
+
+            if (!string.IsNullOrWhiteSpace(lineName))
+            {
+                query = query.Where(d => d.ProductionReport != null && d.ProductionReport.LineName == lineName.Trim());
+            }
+
+            var downtimes = await query
+                .OrderByDescending(d => d.StartTime)
+                .ToListAsync(cancellationToken);
+
+            var result = downtimes.Select(d => new ActiveDowntimeDto(
+                Id: d.Id,
+                StartTime: d.StartTime,
+                EndTime: d.EndTime,
+                Type: d.Type,
+                Reason: d.Reason,
+                LineName: d.ProductionReport?.LineName ?? string.Empty,
+                EquipmentName: d.ProductionReport?.Equipment?.Name ?? string.Empty,
+                Duration: (int)Math.Max(0, ((d.EndTime ?? DateTime.UtcNow) - d.StartTime).TotalMinutes)
             )).ToList();
 
             return result;
@@ -132,77 +207,164 @@ namespace Linea.Infrastructure.Services
 
         public async Task<List<EquipmentStatusDto>> GetEquipmentStatus(string? lineName = null, CancellationToken cancellationToken = default)
         {
-            var query = _database.ProductionReports.AsNoTracking().AsQueryable();
+            var query = _database.Equipment.AsNoTracking().AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(lineName))
-            {
-                query = query.Where(e => e.LineName == lineName);
-            }
-
-            var equipments = await query
-                .Include(e => e.Downtimes)
+            var equipmentWithReports = await query
+                .Include(e => e.ProductionReports)
                 .ToListAsync(cancellationToken);
 
-            var result = equipments
-                .GroupBy(e => new { e.EquipmentName, e.LineName })
-                .Select(g =>
+            var now = DateTime.UtcNow;
+            var currentShift = GetCurrentShift(now);
+            var todayStart = now.Date;
+
+            var result = equipmentWithReports
+                .Select(e =>
                 {
-                    var totalProduction = g.Sum(e => e.GoodCount + e.ScrapCount);
-                    var totalHours = g.Select(e => e.Date).Distinct().Count();
-                    var actualRate = totalHours > 0 ? totalProduction / totalHours : totalProduction;
-                    var targetRate = 83;
-                    
-                    var equipmentId = string.IsNullOrWhiteSpace(g.Key.EquipmentName) 
-                        ? Guid.NewGuid().ToString() 
-                        : g.Key.EquipmentName.Replace(" ", "-").ToUpperInvariant();
-                    
+                    var reports = e.ProductionReports
+                        .Where(r => r.Date >= todayStart && r.Date < todayStart.AddDays(1) && r.Shift == currentShift)
+                        .ToList();
+
+                    if (!string.IsNullOrWhiteSpace(lineName))
+                    {
+                        reports = reports.Where(r => r.LineName == lineName).ToList();
+                    }
+
+                    var actualProduction = reports.Sum(r => r.GoodCount + r.ScrapCount);
+                    var target = e.TargetProductionRate > 0 ? e.TargetProductionRate : 40000;
+                    var efficiency = (int)Math.Round((double)actualProduction * 100.0 / target);
+
+                    var status = GetEffectiveStatus(e.Status, actualProduction);
+
                     return new EquipmentStatusDto(
-                        Id: equipmentId,
-                        Name: g.Key.EquipmentName,
-                        Status: DetermineStatus(g.ToList()),
-                        ActualProductionRate: actualRate,
-                        TargetProductionRate: targetRate,
-                        EfficiencyPercentage: CalculateEfficiency(actualRate, targetRate)
+                        Id: e.Id.ToString(),
+                        Name: e.Name,
+                        Status: status,
+                        ActualProductionRate: actualProduction,
+                        TargetProductionRate: e.TargetProductionRate > 0 ? e.TargetProductionRate : target,
+                        EfficiencyPercentage: efficiency
                     );
                 })
-                .Where(e => !string.IsNullOrWhiteSpace(e.Name))
                 .ToList();
 
             return result;
         }
 
-        private static string DetermineStatus(List<ProductionReport> reports)
+        private static ShiftType GetCurrentShift(DateTime utcNow)
         {
-            var hasActiveDowntime = reports.Any(r => 
-                r.Downtimes.Any(d => d.EndTime == DateTime.MinValue || 
-                               (DateTime.UtcNow - d.EndTime).TotalHours < 1));
-            
-            if (hasActiveDowntime)
-            {
-                var hasMaintenanceDowntime = reports.Any(r => 
-                    r.Downtimes.Any(d => d.Type.Contains("Maintenance", StringComparison.OrdinalIgnoreCase)));
-                
-                if (hasMaintenanceDowntime)
-                    return "maintenance";
-                
-                var hasBreakdown = reports.Any(r => 
-                    r.Downtimes.Any(d => d.Type.Contains("Breakdown", StringComparison.OrdinalIgnoreCase)));
-                
-                if (hasBreakdown)
-                    return "error";
-                
-                return "idle";
-            }
-            
-            var hasRecentProduction = reports.Any(r => 
-                (DateTime.UtcNow - r.Date).TotalHours < 24 && (r.GoodCount + r.ScrapCount) > 0);
-            
-            return hasRecentProduction ? "running" : "idle";
+            var hour = utcNow.Hour;
+            if (hour < 8) return ShiftType.Shift1;
+            if (hour < 16) return ShiftType.Shift2;
+            return ShiftType.Shift3;
         }
 
-        private static int CalculateEfficiency(int actualRate, int targetRate)
+        private static string GetEffectiveStatus(string storedStatus, int actualProduction)
         {
-            return targetRate == 0 ? 0 : (int)Math.Round((double)actualRate * 100.0 / targetRate);
+            var status = storedStatus?.Trim().ToLowerInvariant() ?? string.Empty;
+            if (status == "maintenance" || status == "error")
+                return status;
+            if (actualProduction > 0)
+                return "running";
+            return "idle";
+        }
+
+        public async Task<EquipmentDto> AddEquipmentAsync(CreateEquipmentDto equipment, CancellationToken cancellationToken = default)
+        {
+            var newEquipment = new Equipment
+            {
+                Name = equipment.Name,
+                Status = equipment.Status,
+                TargetProductionRate = equipment.TargetProductionRate,
+                Notes = equipment.Notes
+            };
+
+            _database.Equipment.Add(newEquipment);
+            await _database.SaveChangesAsync(cancellationToken);
+
+            return new EquipmentDto(
+                Id: newEquipment.Id,
+                Name: newEquipment.Name,
+                Status: newEquipment.Status,
+                TargetProductionRate: newEquipment.TargetProductionRate,
+                Notes: newEquipment.Notes
+            );
+        }
+
+        public async Task<EquipmentDto> UpdateEquipmentAsync(Guid id, UpdateEquipmentDto equipment, CancellationToken cancellationToken = default)
+        {
+            var existingEquipment = await _database.Equipment.FindAsync(new object[] { id }, cancellationToken: cancellationToken);
+
+            if (existingEquipment == null)
+            {
+                throw new KeyNotFoundException($"Equipment with id {id} not found.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(equipment.Name))
+            {
+                existingEquipment.Name = equipment.Name;
+            }
+
+            if (!string.IsNullOrWhiteSpace(equipment.Status))
+            {
+                existingEquipment.Status = equipment.Status;
+            }
+
+            if (equipment.TargetProductionRate.HasValue)
+            {
+                existingEquipment.TargetProductionRate = equipment.TargetProductionRate.Value;
+            }
+
+            if (equipment.Notes != null)
+            {
+                existingEquipment.Notes = equipment.Notes;
+            }
+
+            _database.Equipment.Update(existingEquipment);
+            await _database.SaveChangesAsync(cancellationToken);
+
+            return new EquipmentDto(
+                Id: existingEquipment.Id,
+                Name: existingEquipment.Name,
+                Status: existingEquipment.Status,
+                TargetProductionRate: existingEquipment.TargetProductionRate,
+                Notes: existingEquipment.Notes
+            );
+        }
+
+        public async Task<EquipmentDto> SetMaintenanceModeAsync(Guid id, SetMaintenanceModeDto request, CancellationToken cancellationToken = default)
+        {
+            var equipment = await _database.Equipment.FindAsync(new object[] { id }, cancellationToken: cancellationToken);
+
+            if (equipment == null)
+            {
+                throw new KeyNotFoundException($"Equipment with id {id} not found.");
+            }
+
+            equipment.Status = "Maintenance";
+            equipment.Notes = $"Maintenance: {request.Reason}";
+
+            _database.Equipment.Update(equipment);
+            await _database.SaveChangesAsync(cancellationToken);
+
+            return new EquipmentDto(
+                Id: equipment.Id,
+                Name: equipment.Name,
+                Status: equipment.Status,
+                TargetProductionRate: equipment.TargetProductionRate,
+                Notes: equipment.Notes
+            );
+        }
+
+        public async Task DeleteEquipmentAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var equipment = await _database.Equipment.FindAsync(new object[] { id }, cancellationToken: cancellationToken);
+
+            if (equipment == null)
+            {
+                throw new KeyNotFoundException($"Equipment with id {id} not found.");
+            }
+
+            _database.Equipment.Remove(equipment);
+            await _database.SaveChangesAsync(cancellationToken);
         }
     }
 }

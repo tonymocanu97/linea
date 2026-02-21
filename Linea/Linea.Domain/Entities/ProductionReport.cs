@@ -10,7 +10,9 @@ namespace Linea.Domain.Entities
         public ShiftType Shift { get; set; }
 
         public string LineName { get; set; } = string.Empty;
-        public string EquipmentName { get; set; } = string.Empty;
+
+        public Guid EquipmentId { get; set; }
+        public Equipment? Equipment { get; set; }
 
         public int GoodCount { get; set; }
         public int ScrapCount { get; set; }

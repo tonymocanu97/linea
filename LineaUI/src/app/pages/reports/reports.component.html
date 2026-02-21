@@ -1,0 +1,169 @@
+<div class="flex min-h-screen bg-background">
+  <app-sidebar />
+
+  <main class="ml-64 flex-1">
+    <app-header />
+
+    <div class="p-6">
+      <div class="mb-6 flex items-center justify-between animate-fade-in">
+        <div>
+          <h2 class="text-2xl font-bold text-foreground">Reports</h2>
+          <p class="text-muted-foreground">Generate and download production reports</p>
+        </div>
+
+        <button
+          class="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-primary-foreground hover:opacity-90 cursor-pointer"
+          (click)="openGenerateDialog()"
+        >
+          <lucide-icon [name]="plus" class="h-4 w-4"></lucide-icon>
+          Generate Report
+        </button>
+      </div>
+
+      <div *ngIf="loading" class="text-center py-12">
+        <p class="text-muted-foreground">Loading reports...</p>
+      </div>
+
+      <div *ngIf="error" class="text-center py-12">
+        <p class="text-destructive">{{ error }}</p>
+      </div>
+
+      <div
+        *ngIf="!loading && !error"
+        class="rounded-lg border border-border bg-card animate-fade-in"
+        style="animation-delay: 100ms"
+      >
+        <div class="border-b border-border p-4">
+          <h3 class="text-lg font-semibold text-foreground">Recent Reports</h3>
+        </div>
+
+        <div class="p-4">
+          <div *ngIf="reports.length === 0" class="text-center py-8">
+            <p class="text-muted-foreground">
+              No reports generated yet. Click "Generate Report" to create one.
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            <div
+              *ngFor="let report of reports; let i = index"
+              class="flex items-center justify-between rounded-lg border border-border p-4 transition-colors hover:bg-secondary/50 animate-fade-in"
+              [style.animationDelay]="i * 50 + 'ms'"
+            >
+              <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <lucide-icon [name]="fileText" class="h-5 w-5 text-primary"></lucide-icon>
+                </div>
+
+                <div>
+                  <p class="font-medium text-foreground">
+                    {{ getFilterSummary(report) }}
+                  </p>
+
+                  <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <lucide-icon [name]="calendar" class="h-3 w-3"></lucide-icon>
+
+                    {{ report.createdAt | date: 'short' }}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                class="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-sm hover:bg-secondary cursor-pointer"
+                (click)="downloadReport(report)"
+              >
+                <lucide-icon [name]="download" class="h-3 w-3"></lucide-icon>
+                Download
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <app-modal [(isOpen)]="generateDialogOpen">
+    <div class="space-y-4">
+      <div>
+        <h2 class="text-lg font-semibold text-foreground">Generate Report</h2>
+        <p class="text-sm text-muted-foreground">
+          Specify filters to aggregate production data. All fields are optional.
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="report-date"
+            >Date (optional)</label
+          >
+          <input
+            id="report-date"
+            type="date"
+            class="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            [(ngModel)]="reportRequest.date"
+          />
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="report-shift"
+            >Shift (optional)</label
+          >
+          <select
+            id="report-shift"
+            class="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            [(ngModel)]="reportRequest.shift"
+          >
+            <option [ngValue]="null">All Shifts</option>
+            <option [ngValue]="1">Shift 1</option>
+            <option [ngValue]="2">Shift 2</option>
+            <option [ngValue]="3">Shift 3</option>
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="report-line"
+            >Line Name (optional)</label
+          >
+          <input
+            id="report-line"
+            type="text"
+            class="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            placeholder="e.g., Line A"
+            [(ngModel)]="reportRequest.lineName"
+          />
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="report-equipment"
+            >Equipment (optional)</label
+          >
+          <select
+            id="report-equipment"
+            class="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            [(ngModel)]="reportRequest.equipmentId"
+          >
+            <option value="">All Equipment</option>
+            <option *ngFor="let eq of equipmentList" [value]="eq.id">
+              {{ eq.name }} ({{ eq.id }})
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button
+          class="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary cursor-pointer"
+          (click)="generateDialogOpen = false"
+        >
+          Cancel
+        </button>
+        <button
+          class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground cursor-pointer"
+          (click)="handleGenerateReport()"
+        >
+          Generate Report
+        </button>
+      </div>
+    </div>
+  </app-modal>
+</div>

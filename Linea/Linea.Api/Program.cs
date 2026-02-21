@@ -15,6 +15,17 @@ builder.Services
 
 builder.Services.AddOpenApi();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularDev", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddDbContext<LineaDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("LineaDb"));
@@ -22,6 +33,7 @@ builder.Services.AddDbContext<LineaDbContext>(options =>
 
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IDashboardservice, DashboardService>();
+builder.Services.AddScoped<IGeneratedReportService, GeneratedReportService>();
 
 if (builder.Environment.IsDevelopment())
 {
@@ -41,6 +53,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAngularDev");
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

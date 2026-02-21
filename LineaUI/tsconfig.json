@@ -6,8 +6,12 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/app/*"],
-      "@components/*": ["src/app/ui-components/*"],
-      "@core/*": ["src/app/core/*"]
+      "@pages": ["src/app/pages/index.ts"],
+      "@pages/*": ["src/app/pages/*"],
+      "@components": ["src/app/pages/ui-components/index.ts"],
+      "@components/*": ["src/app/pages/ui-components/*"],
+      "@shared": ["src/app/shared/index.ts"],
+      "@shared/*": ["src/app/shared/*"]
     },
     "strict": true,
     "noImplicitOverride": true,

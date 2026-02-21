@@ -1,0 +1,239 @@
+<div class="flex min-h-screen bg-background">
+  <app-sidebar />
+
+  <main class="ml-64 flex-1">
+    <app-header />
+
+    <div class="p-6">
+      <div class="mb-6 flex items-center justify-between animate-fade-in">
+        <div>
+          <h2 class="text-2xl font-bold text-foreground">Equipment</h2>
+          <p class="text-muted-foreground">Manage and monitor production equipment</p>
+        </div>
+
+        <button
+          class="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground cursor-pointer"
+          (click)="openAddDialog()"
+        >
+          <lucide-icon [name]="plus" class="h-4 w-4"></lucide-icon>
+          Add Equipment
+        </button>
+      </div>
+
+      <div *ngIf="loading" class="text-center py-12">
+        <p class="text-muted-foreground">Loading equipment...</p>
+      </div>
+
+      <div *ngIf="error" class="text-center py-12">
+        <p class="text-destructive">{{ error }}</p>
+      </div>
+
+      <div *ngIf="!loading && !error" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div
+          *ngFor="let eq of equipmentList; let i = index"
+          class="animate-fade-in rounded-xl border border-border bg-card shadow-sm"
+          [style.animationDelay]="i * 50 + 'ms'"
+        >
+          <div class="flex flex-row items-start justify-between p-4">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <lucide-icon [name]="cpu" class="h-5 w-5 text-primary"></lucide-icon>
+              </div>
+
+              <div>
+                <h3 class="text-base font-semibold text-foreground">
+                  {{ eq.name }}
+                </h3>
+                <p class="text-sm text-muted-foreground">
+                  {{ eq.id }}
+                </p>
+              </div>
+            </div>
+
+            <span
+              class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+              [ngClass]="badgeClass(eq.status)"
+            >
+              {{ eq.status }}
+            </span>
+          </div>
+
+          <div class="px-4 pb-4">
+            <div class="mb-3 space-y-2">
+              <div class="flex justify-between text-sm">
+                <span class="text-muted-foreground">Efficiency</span>
+                <span class="font-medium text-foreground"> {{ eq.efficiencyPercentage }}% </span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-muted-foreground">Uptime</span>
+                <span class="font-medium text-foreground">
+                  {{ getUptime(eq) }}
+                </span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-muted-foreground">Production Rate</span>
+                <span class="font-medium text-foreground">
+                  {{ eq.actualProductionRate }} / {{ eq.targetProductionRate }}
+                </span>
+              </div>
+            </div>
+
+            <div class="flex gap-2">
+              <button
+                class="flex flex-1 items-center justify-center gap-1 rounded-md border border-border px-2 py-1.5 text-xs font-medium hover:bg-secondary cursor-pointer"
+                (click)="openConfigureDialog(eq)"
+              >
+                <lucide-icon [name]="settings" class="h-3 w-3"></lucide-icon>
+                Configure
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && !error && equipmentList.length === 0" class="text-center py-12">
+        <p class="text-muted-foreground">
+          No equipment found. Click "Add Equipment" to get started.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <app-modal [(isOpen)]="addDialogOpen">
+    <div class="space-y-4">
+      <div>
+        <h2 class="text-lg font-semibold text-foreground">Add New Equipment</h2>
+        <p class="text-sm text-muted-foreground">Enter the details for the new equipment.</p>
+      </div>
+
+      <div class="space-y-4">
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="eq-id">Equipment ID</label>
+          <input
+            id="eq-id"
+            type="text"
+            class="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            placeholder="e.g., CNC-003"
+            [(ngModel)]="newEquipment.id"
+          />
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="eq-name">Equipment Name</label>
+          <input
+            id="eq-name"
+            type="text"
+            class="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            placeholder="e.g., CNC Machine Gamma"
+            [(ngModel)]="newEquipment.name"
+          />
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="eq-status">Initial Status</label>
+          <select
+            id="eq-status"
+            class="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            [(ngModel)]="newEquipment.status"
+          >
+            <option value="running">Running</option>
+            <option value="idle">Idle</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="eq-target"
+            >Target Production Rate</label
+          >
+          <input
+            id="eq-target"
+            type="number"
+            class="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            placeholder="100"
+            [(ngModel)]="newEquipment.targetProductionRate"
+          />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button
+          class="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary cursor-pointer"
+          (click)="addDialogOpen = false"
+        >
+          Cancel
+        </button>
+        <button
+          class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground cursor-pointer"
+          (click)="handleAddEquipment()"
+        >
+          Add Equipment
+        </button>
+      </div>
+    </div>
+  </app-modal>
+
+  <app-modal [(isOpen)]="configureDialogOpen">
+    <div class="space-y-4">
+      <div>
+        <h2 class="text-lg font-semibold text-foreground">Configure Equipment</h2>
+        <p class="text-sm text-muted-foreground">Update settings for {{ selectedEquipment?.id }}</p>
+      </div>
+
+      <div class="space-y-4">
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="config-name"
+            >Equipment Name</label
+          >
+          <input
+            id="config-name"
+            type="text"
+            class="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            [(ngModel)]="configForm.name"
+          />
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="config-status">Status</label>
+          <select
+            id="config-status"
+            class="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            [(ngModel)]="configForm.status"
+          >
+            <option value="running">Running</option>
+            <option value="idle">Idle</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="error">Error</option>
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-foreground" for="config-target"
+            >Target Production Rate</label
+          >
+          <input
+            id="config-target"
+            type="number"
+            class="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            [(ngModel)]="configForm.targetProductionRate"
+          />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button
+          class="inline-flex items-center justify-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-secondary cursor-pointer"
+          (click)="configureDialogOpen = false"
+        >
+          Cancel
+        </button>
+        <button
+          class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground cursor-pointer"
+          (click)="handleConfigure()"
+        >
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </app-modal>
+</div>

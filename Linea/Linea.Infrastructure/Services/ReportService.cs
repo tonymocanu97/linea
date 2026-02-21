@@ -24,7 +24,7 @@ namespace Linea.Infrastructure.Services
                 x.Date == request.Date &&
                 x.Shift == request.Shift &&
                 x.LineName == request.LineName &&
-                x.EquipmentName == request.EquipmentName, cancellationToken);
+                x.EquipmentId == request.EquipmentId, cancellationToken);
 
             if (exists)
                 throw new InvalidOperationException("A report for this date/shift/line already exists.");
@@ -34,7 +34,7 @@ namespace Linea.Infrastructure.Services
                 Date = request.Date,
                 Shift = request.Shift,
                 LineName = request.LineName.Trim(),
-                EquipmentName = request.EquipmentName.Trim(),
+                EquipmentId = request.EquipmentId,
                 GoodCount = request.GoodCount,
                 ScrapCount = request.ScrapCount,
                 Notes = request.Notes
@@ -43,6 +43,7 @@ namespace Linea.Infrastructure.Services
             _database.ProductionReports.Add(entity);
             await _database.SaveChangesAsync(cancellationToken);
 
+            await _database.Entry(entity).Reference(x => x.Equipment).LoadAsync(cancellationToken);
             await _database.Entry(entity).Collection(x => x.Defects).LoadAsync(cancellationToken);
             await _database.Entry(entity).Collection(x => x.Downtimes).LoadAsync(cancellationToken);
 
@@ -52,6 +53,7 @@ namespace Linea.Infrastructure.Services
         public async Task<ReportDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var entity = await _database.ProductionReports
+                .Include(x => x.Equipment)
                 .Include(x => x.Defects)
                 .Include(x => x.Downtimes)
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -68,6 +70,7 @@ namespace Linea.Infrastructure.Services
         {
             var q = _database.ProductionReports
                 .AsNoTracking()
+                .Include(x => x.Equipment)
                 .Include(x => x.Defects)
                 .Include(x => x.Downtimes)
                 .AsQueryable();
@@ -82,13 +85,13 @@ namespace Linea.Infrastructure.Services
                 q = q.Where(x => x.LineName == lineName.Trim());
 
             if (!string.IsNullOrWhiteSpace(equipmentName))
-                q = q.Where(x => x.EquipmentName == equipmentName.Trim());
+                q = q.Where(x => x.Equipment != null && x.Equipment.Name == equipmentName.Trim());
 
             var list = await q
                 .OrderByDescending(x => x.Date)
                 .ThenByDescending(x => x.Shift)
                 .ThenBy(x => x.LineName)
-                .ThenBy(x => x.EquipmentName)
+                .ThenBy(x => x.Equipment != null ? x.Equipment.Name : string.Empty)
                 .ToListAsync(cancellationToken);
 
             return list.Select(Map).ToList();
@@ -99,6 +102,7 @@ namespace Linea.Infrastructure.Services
             ValidateDefect(request);
 
             var report = await _database.ProductionReports
+                .Include(x => x.Equipment)
                 .Include(x => x.Defects)
                 .Include(x => x.Downtimes)
                 .FirstOrDefaultAsync(x => x.Id == reportId, cancellationToken);
@@ -122,6 +126,7 @@ namespace Linea.Infrastructure.Services
             ValidateDowntime(request);
 
             var report = await _database.ProductionReports
+                .Include(x => x.Equipment)
                 .Include(x => x.Defects)
                 .Include(x => x.Downtimes)
                 .FirstOrDefaultAsync(x => x.Id == reportId, cancellationToken);
@@ -146,8 +151,8 @@ namespace Linea.Infrastructure.Services
             if (string.IsNullOrWhiteSpace(request.LineName))
                 throw new ArgumentException("LineName is required.");
 
-            if (string.IsNullOrWhiteSpace(request.EquipmentName))
-                throw new ArgumentException("EquipmentName is required.");
+            if (request.EquipmentId == Guid.Empty)
+                throw new ArgumentException("EquipmentId is required.");
 
             if (request.GoodCount < 0 || request.ScrapCount < 0)
                 throw new ArgumentException("GoodCount/ScrapCount must be >= 0.");
@@ -181,10 +186,10 @@ namespace Linea.Infrastructure.Services
                 .Select(d => new DowntimeDto(
                     d.Id,
                     d.StartTime,
-                    d.EndTime,
+                    d.EndTime ?? DateTime.UtcNow,
                     d.Type,
                     d.Reason,
-                    (int)Math.Max(0, (d.EndTime - d.StartTime).TotalMinutes)))
+                    (int)Math.Max(0, ((d.EndTime ?? DateTime.UtcNow) - d.StartTime).TotalMinutes)))
                 .ToList();
 
             return new ReportDto(
@@ -192,7 +197,7 @@ namespace Linea.Infrastructure.Services
                 report.Date,
                 report.Shift,
                 report.LineName,
-                report.EquipmentName,
+                report.Equipment?.Name ?? string.Empty,
                 report.GoodCount,
                 report.ScrapCount,
                 report.Notes,

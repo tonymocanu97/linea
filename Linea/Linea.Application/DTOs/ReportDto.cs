@@ -38,7 +38,7 @@ namespace Linea.Application.DTOs
     (
         Guid Id,
         DateTime StartTime,
-        DateTime EndTime,
+        DateTime? EndTime,
         string Type,
         string Reason,
         string LineName,
@@ -54,5 +54,35 @@ namespace Linea.Application.DTOs
         int ActualProductionRate,
         int TargetProductionRate,
         int EfficiencyPercentage
+    );
+
+    public sealed record EquipmentDto 
+    (
+        Guid Id,
+        string Name,
+        string Status,
+        int TargetProductionRate,
+        string? Notes
+    );
+
+    public sealed record CreateEquipmentDto
+    (
+        string Name,
+        string Status,
+        int TargetProductionRate,
+        string? Notes
+    );
+
+    public sealed record UpdateEquipmentDto
+    (
+        string? Name,
+        string? Status,
+        int? TargetProductionRate,
+        string? Notes
+    );
+
+    public sealed record SetMaintenanceModeDto
+    (
+        string Reason
     );
 }

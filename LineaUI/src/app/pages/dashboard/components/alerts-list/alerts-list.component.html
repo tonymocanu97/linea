@@ -1,0 +1,73 @@
+<div class="chart-container animate-fade-in h-full" [style.animationDelay]="animationDelay">
+  <div class="mb-4 flex items-center justify-between">
+    <div>
+      <h3 class="text-lg font-semibold text-foreground">Active Alerts</h3>
+      <p class="text-sm text-muted-foreground">{{ alerts.length }} unresolved issues</p>
+    </div>
+
+    <button
+      class="text-sm font-medium text-primary hover:text-primary/80 transition-colors cursor-pointer"
+      routerLink="/alerts"
+      routerLinkActive="text-primary"
+    >
+      View All
+    </button>
+  </div>
+
+  <div class="space-y-3">
+    <div
+      *ngFor="let alert of displayedAlerts; let i = index"
+      class="group relative flex gap-3 rounded-lg border p-3 transition-all hover:scale-[1.02]"
+      [ngClass]="getAlertStyles(alert.type).bg"
+      [style.animationDelay]="500 + i * 100 + 'ms'"
+    >
+      <div class="mt-0.5" [ngClass]="getAlertStyles(alert.type).icon">
+        <lucide-icon
+          *ngIf="alert.type === 'error'; else warningIcon"
+          [name]="alertTriangle"
+          class="h-5 w-5"
+        ></lucide-icon>
+
+        <ng-template #warningIcon>
+          <lucide-icon [name]="wrench" class="h-5 w-5"></lucide-icon>
+        </ng-template>
+      </div>
+
+      <div class="flex-1 space-y-1">
+        <div class="flex items-start justify-between">
+          <p class="text-sm font-medium text-foreground">
+            {{ alert.title }}
+          </p>
+
+          <button
+            class="opacity-0 transition-opacity group-hover:opacity-100"
+            (click)="dismiss(alert.id)"
+          >
+            <lucide-icon
+              [name]="close"
+              class="h-4 w-4 text-muted-foreground hover:text-foreground"
+            ></lucide-icon>
+          </button>
+        </div>
+
+        <p class="text-xs text-muted-foreground">
+          {{ alert.description }}
+        </p>
+
+        <div class="flex items-center gap-3 text-xs text-muted-foreground">
+          <span class="flex items-center gap-1">
+            <lucide-icon [name]="clock" class="h-3 w-3"></lucide-icon>
+            {{ alert.time }}
+          </span>
+
+          <span
+            *ngIf="alert.equipment"
+            class="rounded bg-secondary px-1.5 py-0.5 font-mono text-[10px]"
+          >
+            {{ alert.equipment }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
