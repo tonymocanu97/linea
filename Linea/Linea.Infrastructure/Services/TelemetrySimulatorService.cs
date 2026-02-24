@@ -56,21 +56,24 @@ namespace Linea.Infrastructure.Services
             using var scope = _scopeFactory.CreateScope();
             var database = scope.ServiceProvider.GetRequiredService<LineaDbContext>();
 
-            var today = DateTime.UtcNow;
-            var shift = GetCurrentShiftUtc(DateTime.UtcNow);
+            var equipment = await database.Equipment.FirstOrDefaultAsync(cancellationToken);
+            if (equipment == null)
+                return;
 
-            var equipment = await database.Equipment.FirstAsync(cancellationToken);
+            var now = DateTime.UtcNow;
+            var todayDate = DateTime.SpecifyKind(now.Date, DateTimeKind.Utc);
+            var shift = GetCurrentShiftUtc(now);
 
             foreach (var lineName in Lines)
             {
                 var report = await database.ProductionReports
-                    .FirstOrDefaultAsync(r => r.Date == today && r.Shift == shift && r.LineName == lineName, cancellationToken);
+                    .FirstOrDefaultAsync(r => r.Date == todayDate && r.Shift == shift && r.LineName == lineName, cancellationToken);
 
                 if (report == null)
                 {
                     report = new ProductionReport
                     {
-                        Date = today,
+                        Date = todayDate,
                         Shift = shift,
                         LineName = lineName,
                         EquipmentId = equipment.Id,
