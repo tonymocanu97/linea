@@ -5,6 +5,7 @@ import {
   FileText,
   LayoutDashboard,
   Settings,
+  Sparkles,
   TriangleAlert,
   Users,
 } from 'lucide-angular';
@@ -14,6 +15,7 @@ export const OVERVIEW_NAV: NavItem[] = [
   { label: 'Dashboard', icon: LayoutDashboard, route: '/dashboard' },
   { label: 'Real-time Monitor', icon: Activity, comingSoon: true },
   { label: 'Analytics', icon: ChartColumn, route: '/analytics' },
+  { label: 'AI Insights', icon: Sparkles, route: '/ai-insights' },
 ];
 
 export const PRODUCTION_NAV: NavItem[] = [

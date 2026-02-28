@@ -34,6 +34,7 @@ builder.Services.AddDbContext<LineaDbContext>(options =>
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IDashboardservice, DashboardService>();
 builder.Services.AddScoped<IGeneratedReportService, GeneratedReportService>();
+builder.Services.AddScoped<IInsightsService, InsightsService>();
 
 if (builder.Environment.IsDevelopment())
 {

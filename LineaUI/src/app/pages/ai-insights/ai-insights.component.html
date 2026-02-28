@@ -1,0 +1,127 @@
+<div class="flex min-h-screen bg-background">
+  <app-sidebar />
+
+  <main class="ml-64 flex-1 flex flex-col">
+    <app-header />
+
+    <div class="flex flex-1 flex-col p-6">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-foreground">
+          AI Insights <span class="text-primary">Assistant</span>
+        </h2>
+        <p class="text-muted-foreground">
+          Ask questions about production data in English. The AI uses your dashboard data to answer.
+        </p>
+      </div>
+
+      <div class="mb-4 rounded-xl border border-border bg-card p-4">
+        <p class="mb-2 text-sm font-medium text-foreground">Quick actions</p>
+        <p class="mb-3 text-xs text-muted-foreground">Click a button to get predefined insights:</p>
+        <div class="flex flex-wrap gap-3">
+          <button
+            type="button"
+            (click)="onPresetMaintenance()"
+            [disabled]="loading"
+            class="inline-flex items-center gap-2 rounded-lg border border-border bg-secondary/50 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-50"
+          >
+            <lucide-icon [name]="wrench" class="h-4 w-4"></lucide-icon>
+            Predictive maintenance recommendations
+          </button>
+          <button
+            type="button"
+            (click)="onPresetReport()"
+            [disabled]="loading"
+            class="inline-flex items-center gap-2 rounded-lg border border-border bg-secondary/50 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-50"
+          >
+            <lucide-icon [name]="fileText" class="h-4 w-4"></lucide-icon>
+            Generate production report
+          </button>
+        </div>
+      </div>
+
+      <div class="mb-4 flex flex-wrap gap-4 text-sm">
+        <label class="flex items-center gap-2">
+          <span class="text-muted-foreground">From</span>
+          <input
+            type="date"
+            [(ngModel)]="from"
+            class="rounded border border-border bg-background px-2 py-1 text-foreground"
+          />
+        </label>
+        <label class="flex items-center gap-2">
+          <span class="text-muted-foreground">To</span>
+          <input
+            type="date"
+            [(ngModel)]="to"
+            class="rounded border border-border bg-background px-2 py-1 text-foreground"
+          />
+        </label>
+        <label class="flex items-center gap-2">
+          <span class="text-muted-foreground">Line</span>
+          <input
+            type="text"
+            [(ngModel)]="lineName"
+            placeholder="Optional"
+            class="rounded border border-border bg-background px-2 py-1 text-foreground placeholder:text-muted-foreground"
+          />
+        </label>
+      </div>
+
+      <div class="mb-4 flex-1 overflow-y-auto rounded-xl border border-border bg-card p-4">
+        <div
+          *ngIf="messages.length === 0"
+          class="flex h-48 flex-col items-center justify-center text-muted-foreground"
+        >
+          <lucide-icon [name]="sparkles" class="mb-2 h-12 w-12"></lucide-icon>
+          <p class="text-sm">Type a question or use a quick action above.</p>
+          <p class="mt-1 text-xs">All responses are in English.</p>
+        </div>
+
+        <div *ngFor="let msg of messages" class="mb-4">
+          <div
+            [class]="
+              msg.role === 'user'
+                ? 'ml-auto max-w-[85%] rounded-lg bg-primary/20 px-4 py-2 text-foreground'
+                : 'max-w-[85%] rounded-lg bg-muted px-4 py-2 text-foreground'
+            "
+          >
+            <div class="mb-1 flex items-center gap-2 text-xs text-muted-foreground">
+              <lucide-icon
+                *ngIf="msg.role === 'assistant'"
+                [name]="bot"
+                class="h-3 w-3"
+              ></lucide-icon>
+              <span>{{ msg.role === 'user' ? 'You' : 'AI' }}</span>
+            </div>
+            <div class="whitespace-pre-wrap text-sm">{{ msg.content }}</div>
+          </div>
+        </div>
+
+        <div *ngIf="loading" class="flex items-center gap-2 text-muted-foreground">
+          <lucide-icon [name]="bot" class="h-4 w-4 animate-pulse"></lucide-icon>
+          <span class="text-sm">Thinking...</span>
+        </div>
+      </div>
+
+      <p *ngIf="error" class="mb-2 text-sm text-destructive">{{ error }}</p>
+
+      <div class="flex gap-2">
+        <input
+          type="text"
+          [(ngModel)]="inputText"
+          (keydown.enter)="sendMessage()"
+          placeholder="Ask a question in English..."
+          class="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+        <button
+          type="button"
+          (click)="sendMessage()"
+          [disabled]="loading || !inputText.trim()"
+          class="rounded-lg bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+        >
+          <lucide-icon [name]="send" class="h-5 w-5"></lucide-icon>
+        </button>
+      </div>
+    </div>
+  </main>
+</div>
