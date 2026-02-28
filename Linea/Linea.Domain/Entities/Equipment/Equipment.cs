@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Linea.Domain.Entities.Reports;
 
-namespace Linea.Domain.Entities
+namespace Linea.Domain.Entities.Equipment
 {
     public class Equipment
     {

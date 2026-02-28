@@ -1,6 +1,7 @@
-using Linea.Application.DTOs;
 using Linea.Application.DTOs.Dashboard;
-using Linea.Domain.Entities;
+using Linea.Application.DTOs.Downtime;
+using Linea.Application.DTOs.Equipment;
+using Linea.Domain.Entities.Dashboard;
 
 namespace Linea.Application.Interfaces
 {
@@ -8,13 +9,13 @@ namespace Linea.Application.Interfaces
     {
         Task<DashboardSummary> GetSummaryAsync(DateOnly from, DateOnly to, string? lineName, CancellationToken cancellationToken = default);
         Task<List<HourlyProductionPoint>> GetHourlyProduction(DateOnly from, DateOnly to, string? lineName, CancellationToken cancellationToken);
-        Task<List<ActiveDowntimeDto>> GetActiveDowntimes(string? lineName, CancellationToken cancellationToken);
-        Task<List<ActiveDowntimeDto>> GetDowntimes(DateOnly from, DateOnly to, string? lineName, CancellationToken cancellationToken = default);
-        Task<List<EquipmentStatusDto>> GetEquipmentStatus(string? lineName, CancellationToken cancellationToken);
+        Task<List<ActiveDowntimeResponse>> GetActiveDowntimes(string? lineName, CancellationToken cancellationToken);
+        Task<List<ActiveDowntimeResponse>> GetDowntimes(DateOnly from, DateOnly to, string? lineName, CancellationToken cancellationToken = default);
+        Task<List<EquipmentStatusSummary>> GetEquipmentStatus(string? lineName, CancellationToken cancellationToken);
 
-        Task<EquipmentDto> AddEquipmentAsync(CreateEquipmentDto equipment, CancellationToken cancellationToken = default);
-        Task<EquipmentDto> UpdateEquipmentAsync(Guid id, UpdateEquipmentDto equipment, CancellationToken cancellationToken = default);
-        Task<EquipmentDto> SetMaintenanceModeAsync(Guid id, SetMaintenanceModeDto request, CancellationToken cancellationToken = default);
+        Task<EquipmentResponse> AddEquipmentAsync(CreateEquipmentRequest equipment, CancellationToken cancellationToken = default);
+        Task<EquipmentResponse> UpdateEquipmentAsync(Guid id, UpdateEquipmentRequest equipment, CancellationToken cancellationToken = default);
+        Task<EquipmentResponse> SetMaintenanceModeAsync(Guid id, SetMaintenanceModeRequest request, CancellationToken cancellationToken = default);
         Task DeleteEquipmentAsync(Guid id, CancellationToken cancellationToken = default);
 
     }

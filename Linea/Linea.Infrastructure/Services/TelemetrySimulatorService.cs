@@ -1,4 +1,4 @@
-using Linea.Domain.Entities;
+using Linea.Domain.Entities.Reports;
 using Linea.Domain.Enums;
 using Linea.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Linea.Application.DTOs
+namespace Linea.Application.DTOs.Downtime
 {
     public sealed record AddDowntimeRequest
     (

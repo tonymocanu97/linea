@@ -1,6 +1,6 @@
 ﻿using Linea.Domain.Enums;
 
-namespace Linea.Application.DTOs
+namespace Linea.Application.DTOs.Reports
 {
     public sealed record CreateReportRequest
     (

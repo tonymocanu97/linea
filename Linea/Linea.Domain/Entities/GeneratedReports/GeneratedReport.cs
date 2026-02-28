@@ -1,6 +1,6 @@
 using Linea.Domain.Enums;
 
-namespace Linea.Domain.Entities
+namespace Linea.Domain.Entities.GeneratedReports
 {
     public class GeneratedReport
     {

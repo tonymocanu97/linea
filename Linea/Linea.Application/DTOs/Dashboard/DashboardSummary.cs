@@ -2,7 +2,7 @@ using System;
 
 namespace Linea.Application.DTOs.Dashboard
 {
-    public sealed record TopDefectDto(string Type, int Quantity);
+    public sealed record TopDefectSummary(string Type, int Quantity);
 
     public sealed record DashboardSummary
     (
@@ -13,6 +13,6 @@ namespace Linea.Application.DTOs.Dashboard
         int TotalScrap,
         decimal ScrapRatePercent,
         int TotalDowntimeMinutes,
-        IReadOnlyList<TopDefectDto> TopDefects
+        IReadOnlyList<TopDefectSummary> TopDefects
     );
 }

@@ -1,6 +1,8 @@
-﻿using Linea.Application.DTOs;
+﻿using Linea.Application.DTOs.Defect;
+using Linea.Application.DTOs.Downtime;
+using Linea.Application.DTOs.Reports;
 using Linea.Application.Interfaces;
-using Linea.Domain.Entities;
+using Linea.Domain.Entities.Reports;
 using Linea.Domain.Enums;
 using Linea.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +18,7 @@ namespace Linea.Infrastructure.Services
             _database = database;
         }
 
-        public async Task<ReportDto> CreateAsync(CreateReportRequest request, CancellationToken cancellationToken = default)
+        public async Task<ReportResponse> CreateAsync(CreateReportRequest request, CancellationToken cancellationToken = default)
         {
             ValidateCreate(request);
 
@@ -50,7 +52,7 @@ namespace Linea.Infrastructure.Services
             return Map(entity);
         }
 
-        public async Task<ReportDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<ReportResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var entity = await _database.ProductionReports
                 .Include(x => x.Equipment)
@@ -61,7 +63,7 @@ namespace Linea.Infrastructure.Services
             return entity is null ? null : Map(entity);
         }
 
-        public async Task<IReadOnlyList<ReportDto>> GetAsync(
+        public async Task<IReadOnlyList<ReportResponse>> GetAsync(
         DateTime? date,
         ShiftType? shift,
         string? lineName,
@@ -97,7 +99,7 @@ namespace Linea.Infrastructure.Services
             return list.Select(Map).ToList();
         }
 
-        public async Task<ReportDto?> AddDefectAsync(Guid reportId, AddDefectRequest request, CancellationToken cancellationToken = default)
+        public async Task<ReportResponse?> AddDefectAsync(Guid reportId, AddDefectRequest request, CancellationToken cancellationToken = default)
         {
             ValidateDefect(request);
 
@@ -121,7 +123,7 @@ namespace Linea.Infrastructure.Services
             return Map(report);
         }
 
-        public async Task<ReportDto?> AddDowntimeAsync(Guid reportId, AddDowntimeRequest request, CancellationToken cancellationToken = default)
+        public async Task<ReportResponse?> AddDowntimeAsync(Guid reportId, AddDowntimeRequest request, CancellationToken cancellationToken = default)
         {
             ValidateDowntime(request);
 
@@ -176,14 +178,14 @@ namespace Linea.Infrastructure.Services
                 throw new ArgumentException("EndUtc must be after StartUtc.");
         }
 
-        private ReportDto Map(ProductionReport report)
+        private ReportResponse Map(ProductionReport report)
         {
             var defects = report.Defects
-            .Select(d => new DefectDto(d.Id, d.Type, d.Quantity, d.Comment))
+            .Select(d => new DefectResponse(d.Id, d.Type, d.Quantity, d.Comment))
             .ToList();
 
             var downtimes = report.Downtimes
-                .Select(d => new DowntimeDto(
+                .Select(d => new DowntimeResponse(
                     d.Id,
                     d.StartTime,
                     d.EndTime ?? DateTime.UtcNow,
@@ -192,7 +194,7 @@ namespace Linea.Infrastructure.Services
                     (int)Math.Max(0, ((d.EndTime ?? DateTime.UtcNow) - d.StartTime).TotalMinutes)))
                 .ToList();
 
-            return new ReportDto(
+            return new ReportResponse(
                 report.Id,
                 report.Date,
                 report.Shift,

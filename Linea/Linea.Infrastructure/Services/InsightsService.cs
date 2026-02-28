@@ -1,6 +1,6 @@
 using System.Text;
-using Linea.Application.DTOs;
 using Linea.Application.DTOs.Dashboard;
+using Linea.Application.DTOs.Downtime;
 using Linea.Application.Interfaces;
 using Microsoft.Extensions.Configuration;
 using OpenAI.Chat;
@@ -63,8 +63,8 @@ namespace Linea.Infrastructure.Services
 
         private static string BuildContext(
             DashboardSummary summary,
-            IReadOnlyList<ActiveDowntimeDto> downtimes,
-            IReadOnlyList<EquipmentStatusDto> equipmentStatus,
+            IReadOnlyList<ActiveDowntimeResponse> downtimes,
+            IReadOnlyList<EquipmentStatusSummary> equipmentStatus,
             DateOnly from,
             DateOnly to,
             string? lineName)

@@ -1,7 +1,8 @@
-using Linea.Application.DTOs;
 using Linea.Application.DTOs.Dashboard;
+using Linea.Application.DTOs.Downtime;
+using Linea.Application.DTOs.Equipment;
 using Linea.Application.Interfaces;
-using Linea.Domain.Entities;
+using Linea.Domain.Entities.Dashboard;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Linea.Api.Controllers
@@ -47,7 +48,7 @@ namespace Linea.Api.Controllers
 
 
         [HttpGet("active-downtimes")]
-        public async Task<ActionResult<List<ActiveDowntimeDto>>> GetActiveDowntimes([FromQuery] string? lineName, CancellationToken cancellationToken)
+        public async Task<ActionResult<List<ActiveDowntimeResponse>>> GetActiveDowntimes([FromQuery] string? lineName, CancellationToken cancellationToken)
         {
             try
             {
@@ -61,7 +62,7 @@ namespace Linea.Api.Controllers
         }
 
         [HttpGet("downtimes")]
-        public async Task<ActionResult<List<ActiveDowntimeDto>>> GetDowntimes([FromQuery] DateOnly from, [FromQuery] DateOnly to, [FromQuery] string? lineName, CancellationToken cancellationToken)
+        public async Task<ActionResult<List<ActiveDowntimeResponse>>> GetDowntimes([FromQuery] DateOnly from, [FromQuery] DateOnly to, [FromQuery] string? lineName, CancellationToken cancellationToken)
         {
             try
             {
@@ -79,7 +80,7 @@ namespace Linea.Api.Controllers
         }
 
         [HttpGet("equipment-status")]
-        public async Task<ActionResult<List<EquipmentStatusDto>>> GetEquipmentStatus([FromQuery] string? lineName, CancellationToken cancellationToken)
+        public async Task<ActionResult<List<EquipmentStatusSummary>>> GetEquipmentStatus([FromQuery] string? lineName, CancellationToken cancellationToken)
         {
             try
             {
@@ -93,7 +94,7 @@ namespace Linea.Api.Controllers
         }
 
         [HttpPost("equipment")]
-        public async Task<ActionResult<EquipmentDto>> AddEquipment([FromBody] CreateEquipmentDto equipment, CancellationToken cancellationToken)
+        public async Task<ActionResult<EquipmentResponse>> AddEquipment([FromBody] CreateEquipmentRequest equipment, CancellationToken cancellationToken)
         {
             try
             {
@@ -111,7 +112,7 @@ namespace Linea.Api.Controllers
         }
 
         [HttpPatch("equipment/{id}")]
-        public async Task<ActionResult<EquipmentDto>> UpdateEquipment([FromRoute] Guid id, [FromBody] UpdateEquipmentDto equipment, CancellationToken cancellationToken)
+        public async Task<ActionResult<EquipmentResponse>> UpdateEquipment([FromRoute] Guid id, [FromBody] UpdateEquipmentRequest equipment, CancellationToken cancellationToken)
         {
             try
             {
@@ -133,7 +134,7 @@ namespace Linea.Api.Controllers
         }
 
         [HttpPost("equipment/{id}/maintenance")]
-        public async Task<ActionResult<EquipmentDto>> SetMaintenanceMode([FromRoute] Guid id, [FromBody] SetMaintenanceModeDto request, CancellationToken cancellationToken)
+        public async Task<ActionResult<EquipmentResponse>> SetMaintenanceMode([FromRoute] Guid id, [FromBody] SetMaintenanceModeRequest request, CancellationToken cancellationToken)
         {
             try
             {

@@ -1,4 +1,6 @@
-using Linea.Domain.Entities;
+using Linea.Domain.Entities.Equipment;
+using Linea.Domain.Entities.GeneratedReports;
+using Linea.Domain.Entities.Reports;
 using Microsoft.EntityFrameworkCore;
 
 namespace Linea.Infrastructure.Persistence

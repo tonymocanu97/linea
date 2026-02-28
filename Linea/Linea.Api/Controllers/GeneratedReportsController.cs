@@ -1,4 +1,4 @@
-using Linea.Application.DTOs;
+using Linea.Application.DTOs.GeneratedReports;
 using Linea.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +13,7 @@ namespace Linea.Api.Controllers
         public GeneratedReportsController(IGeneratedReportService service) => _service = service;
 
         [HttpPost]
-        public async Task<ActionResult<GeneratedReportDto>> Create([FromBody] CreateGeneratedReportRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<GeneratedReportResponse>> Create([FromBody] CreateGeneratedReportRequest request, CancellationToken cancellationToken)
         {
             try
             {
@@ -27,14 +27,14 @@ namespace Linea.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<GeneratedReportDto>>> GetAll(CancellationToken cancellationToken)
+        public async Task<ActionResult<IReadOnlyList<GeneratedReportResponse>>> GetAll(CancellationToken cancellationToken)
         {
             var list = await _service.GetAllAsync(cancellationToken);
             return Ok(list);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<GeneratedReportDto>> GetById(Guid id, CancellationToken cancellationToken)
+        public async Task<ActionResult<GeneratedReportResponse>> GetById(Guid id, CancellationToken cancellationToken)
         {
             var report = await _service.GetByIdAsync(id, cancellationToken);
             return report is null ? NotFound() : Ok(report);

@@ -1,6 +1,7 @@
-﻿using Linea.Domain.Enums;
+using Linea.Domain.Enums;
+using EquipmentEntity = Linea.Domain.Entities.Equipment.Equipment;
 
-namespace Linea.Domain.Entities
+namespace Linea.Domain.Entities.Reports
 {
     public class ProductionReport
     {
@@ -12,7 +13,7 @@ namespace Linea.Domain.Entities
         public string LineName { get; set; } = string.Empty;
 
         public Guid EquipmentId { get; set; }
-        public Equipment? Equipment { get; set; }
+        public EquipmentEntity? Equipment { get; set; }
 
         public int GoodCount { get; set; }
         public int ScrapCount { get; set; }

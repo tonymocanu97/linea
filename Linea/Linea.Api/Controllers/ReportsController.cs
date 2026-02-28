@@ -1,4 +1,6 @@
-﻿using Linea.Application.DTOs;
+﻿using Linea.Application.DTOs.Defect;
+using Linea.Application.DTOs.Downtime;
+using Linea.Application.DTOs.Reports;
 using Linea.Application.Interfaces;
 using Linea.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +16,7 @@ namespace Linea.Api.Controllers
         public ReportsController(IReportService service) => _service = service;
 
         [HttpPost]
-        public async Task<ActionResult<ReportDto>> Create([FromBody] CreateReportRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<ReportResponse>> Create([FromBody] CreateReportRequest request, CancellationToken cancellationToken)
         {
             try
             {
@@ -32,21 +34,21 @@ namespace Linea.Api.Controllers
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<ReportDto>> GetById(Guid id, CancellationToken cancellationToken)
+        public async Task<ActionResult<ReportResponse>> GetById(Guid id, CancellationToken cancellationToken)
         {
             var report = await _service.GetByIdAsync(id, cancellationToken);
             return report is null ? NotFound() : Ok(report);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<ReportDto>>> Get([FromQuery] DateTime? date, [FromQuery] ShiftType shift, [FromQuery] string? lineName, [FromQuery] string? equipment, CancellationToken cancellationToken)
+        public async Task<ActionResult<IReadOnlyList<ReportResponse>>> Get([FromQuery] DateTime? date, [FromQuery] ShiftType shift, [FromQuery] string? lineName, [FromQuery] string? equipment, CancellationToken cancellationToken)
         {
             var list = await _service.GetAsync(date, shift, lineName, equipment, cancellationToken);
             return Ok(list);
         }
 
         [HttpPost("{id:guid}/defects")]
-        public async Task<ActionResult<ReportDto>> AddDefect(Guid id, [FromBody] AddDefectRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<ReportResponse>> AddDefect(Guid id, [FromBody] AddDefectRequest request, CancellationToken cancellationToken)
         {
             try
             {
@@ -60,7 +62,7 @@ namespace Linea.Api.Controllers
         }
 
         [HttpPost("{id:guid}/downtimes")]
-        public async Task<ActionResult<ReportDto>> AddDowntime(Guid id, [FromBody] AddDowntimeRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<ReportResponse>> AddDowntime(Guid id, [FromBody] AddDowntimeRequest request, CancellationToken cancellationToken)
         {
             try
             {

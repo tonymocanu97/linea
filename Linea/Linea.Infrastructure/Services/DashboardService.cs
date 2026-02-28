@@ -1,7 +1,9 @@
-using Linea.Application.DTOs;
 using Linea.Application.DTOs.Dashboard;
+using Linea.Application.DTOs.Downtime;
+using Linea.Application.DTOs.Equipment;
 using Linea.Application.Interfaces;
-using Linea.Domain.Entities;
+using Linea.Domain.Entities.Dashboard;
+using Linea.Domain.Entities.Equipment;
 using Linea.Domain.Enums;
 using Linea.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -80,7 +82,7 @@ namespace Linea.Infrastructure.Services
                 .Where(d => reportIds.Contains(d.ProductionReportId))
                 .GroupBy(d => d.Type)
                 .OrderByDescending(g => g.Sum(x => x.Quantity))
-                .Select(g => new TopDefectDto(g.Key, g.Sum(x => x.Quantity)))
+                .Select(g => new TopDefectSummary(g.Key, g.Sum(x => x.Quantity)))
                 .Take(5)
                 .ToListAsync(cancellationToken);
 
@@ -131,7 +133,7 @@ namespace Linea.Infrastructure.Services
             return hourlyData;
         }
 
-        public async Task<List<ActiveDowntimeDto>> GetActiveDowntimes(string? lineName = null, CancellationToken cancellationToken = default)
+        public async Task<List<ActiveDowntimeResponse>> GetActiveDowntimes(string? lineName = null, CancellationToken cancellationToken = default)
         {
             var query = _database.Downtimes
                 .AsNoTracking()
@@ -148,7 +150,7 @@ namespace Linea.Infrastructure.Services
                 .OrderByDescending(d => d.StartTime)
                 .ToListAsync();
 
-            var result = downtimes.Select(d => new ActiveDowntimeDto(
+            var result = downtimes.Select(d => new ActiveDowntimeResponse(
                 Id: d.Id,
                 StartTime: d.StartTime,
                 EndTime: d.EndTime,
@@ -162,7 +164,7 @@ namespace Linea.Infrastructure.Services
             return result;
         }
 
-        public async Task<List<ActiveDowntimeDto>> GetDowntimes(DateOnly from, DateOnly to, string? lineName = null, CancellationToken cancellationToken = default)
+        public async Task<List<ActiveDowntimeResponse>> GetDowntimes(DateOnly from, DateOnly to, string? lineName = null, CancellationToken cancellationToken = default)
         {
             if (to < from)
             {
@@ -191,7 +193,7 @@ namespace Linea.Infrastructure.Services
                 .OrderByDescending(d => d.StartTime)
                 .ToListAsync(cancellationToken);
 
-            var result = downtimes.Select(d => new ActiveDowntimeDto(
+            var result = downtimes.Select(d => new ActiveDowntimeResponse(
                 Id: d.Id,
                 StartTime: d.StartTime,
                 EndTime: d.EndTime,
@@ -205,7 +207,7 @@ namespace Linea.Infrastructure.Services
             return result;
         }
 
-        public async Task<List<EquipmentStatusDto>> GetEquipmentStatus(string? lineName = null, CancellationToken cancellationToken = default)
+        public async Task<List<EquipmentStatusSummary>> GetEquipmentStatus(string? lineName = null, CancellationToken cancellationToken = default)
         {
             var query = _database.Equipment.AsNoTracking().AsQueryable();
 
@@ -235,7 +237,7 @@ namespace Linea.Infrastructure.Services
 
                     var status = GetEffectiveStatus(e.Status, actualProduction);
 
-                    return new EquipmentStatusDto(
+                    return new EquipmentStatusSummary(
                         Id: e.Id.ToString(),
                         Name: e.Name,
                         Status: status,
@@ -267,7 +269,7 @@ namespace Linea.Infrastructure.Services
             return "idle";
         }
 
-        public async Task<EquipmentDto> AddEquipmentAsync(CreateEquipmentDto equipment, CancellationToken cancellationToken = default)
+        public async Task<EquipmentResponse> AddEquipmentAsync(CreateEquipmentRequest equipment, CancellationToken cancellationToken = default)
         {
             var newEquipment = new Equipment
             {
@@ -280,7 +282,7 @@ namespace Linea.Infrastructure.Services
             _database.Equipment.Add(newEquipment);
             await _database.SaveChangesAsync(cancellationToken);
 
-            return new EquipmentDto(
+            return new EquipmentResponse(
                 Id: newEquipment.Id,
                 Name: newEquipment.Name,
                 Status: newEquipment.Status,
@@ -289,7 +291,7 @@ namespace Linea.Infrastructure.Services
             );
         }
 
-        public async Task<EquipmentDto> UpdateEquipmentAsync(Guid id, UpdateEquipmentDto equipment, CancellationToken cancellationToken = default)
+        public async Task<EquipmentResponse> UpdateEquipmentAsync(Guid id, UpdateEquipmentRequest equipment, CancellationToken cancellationToken = default)
         {
             var existingEquipment = await _database.Equipment.FindAsync(new object[] { id }, cancellationToken: cancellationToken);
 
@@ -321,7 +323,7 @@ namespace Linea.Infrastructure.Services
             _database.Equipment.Update(existingEquipment);
             await _database.SaveChangesAsync(cancellationToken);
 
-            return new EquipmentDto(
+            return new EquipmentResponse(
                 Id: existingEquipment.Id,
                 Name: existingEquipment.Name,
                 Status: existingEquipment.Status,
@@ -330,7 +332,7 @@ namespace Linea.Infrastructure.Services
             );
         }
 
-        public async Task<EquipmentDto> SetMaintenanceModeAsync(Guid id, SetMaintenanceModeDto request, CancellationToken cancellationToken = default)
+        public async Task<EquipmentResponse> SetMaintenanceModeAsync(Guid id, SetMaintenanceModeRequest request, CancellationToken cancellationToken = default)
         {
             var equipment = await _database.Equipment.FindAsync(new object[] { id }, cancellationToken: cancellationToken);
 
@@ -345,7 +347,7 @@ namespace Linea.Infrastructure.Services
             _database.Equipment.Update(equipment);
             await _database.SaveChangesAsync(cancellationToken);
 
-            return new EquipmentDto(
+            return new EquipmentResponse(
                 Id: equipment.Id,
                 Name: equipment.Name,
                 Status: equipment.Status,

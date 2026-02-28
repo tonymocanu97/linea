@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Linea.Domain.Entities
+namespace Linea.Domain.Entities.Reports
 {
     public class Downtime
     {

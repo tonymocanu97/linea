@@ -1,6 +1,7 @@
-using Linea.Application.DTOs;
+using Linea.Application.DTOs.GeneratedReports;
 using Linea.Application.Interfaces;
-using Linea.Domain.Entities;
+using Linea.Domain.Entities.GeneratedReports;
+using Linea.Domain.Entities.Reports;
 using Linea.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
@@ -16,7 +17,7 @@ namespace Linea.Infrastructure.Services
             _database = database;
         }
 
-        public async Task<GeneratedReportDto> CreateAsync(CreateGeneratedReportRequest request, CancellationToken cancellationToken = default)
+        public async Task<GeneratedReportResponse> CreateAsync(CreateGeneratedReportRequest request, CancellationToken cancellationToken = default)
         {
             string? equipmentName = null;
             if (request.EquipmentId.HasValue)
@@ -45,7 +46,7 @@ namespace Linea.Infrastructure.Services
             return Map(entity);
         }
 
-        public async Task<IReadOnlyList<GeneratedReportDto>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<GeneratedReportResponse>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             var list = await _database.GeneratedReports
                 .OrderByDescending(x => x.CreatedAt)
@@ -54,7 +55,7 @@ namespace Linea.Infrastructure.Services
             return list.Select(Map).ToList();
         }
 
-        public async Task<GeneratedReportDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<GeneratedReportResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var entity = await _database.GeneratedReports
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -153,9 +154,9 @@ namespace Linea.Infrastructure.Services
             return Encoding.UTF8.GetBytes(content.ToString());
         }
 
-        private GeneratedReportDto Map(GeneratedReport entity)
+        private GeneratedReportResponse Map(GeneratedReport entity)
         {
-            return new GeneratedReportDto(
+            return new GeneratedReportResponse(
                 entity.Id,
                 entity.CreatedAt,
                 entity.DateFilter,
