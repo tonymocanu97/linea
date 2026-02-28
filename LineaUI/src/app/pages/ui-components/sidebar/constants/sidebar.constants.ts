@@ -1,5 +1,4 @@
 import {
-  Activity,
   ChartColumn,
   Cpu,
   FileText,
@@ -13,7 +12,6 @@ import { NavItem } from '../models';
 
 export const OVERVIEW_NAV: NavItem[] = [
   { label: 'Dashboard', icon: LayoutDashboard, route: '/dashboard' },
-  { label: 'Real-time Monitor', icon: Activity, comingSoon: true },
   { label: 'Analytics', icon: ChartColumn, route: '/analytics' },
   { label: 'AI Insights', icon: Sparkles, route: '/ai-insights' },
 ];

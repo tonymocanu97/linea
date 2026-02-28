@@ -13,7 +13,6 @@ export const routes: Routes = [
   { path: '', component: DashboardComponent },
 
   { path: 'dashboard', component: DashboardComponent },
-  { path: 'monitor', component: DashboardComponent },
   { path: 'analytics', component: AnalyticsComponent },
   { path: 'ai-insights', component: AiInsightsComponent },
 
