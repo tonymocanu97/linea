@@ -59,6 +59,7 @@ Thumbs.db
 publish/
 Linea/Frontend/
 Linea/Linea.Api/wwwroot/
+scripts/
 *.Publish.xml
 
 # LocalDB, SQLite, DB files you don't want committed
