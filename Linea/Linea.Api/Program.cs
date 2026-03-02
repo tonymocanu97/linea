@@ -1,10 +1,34 @@
+using System.Text;
 using Linea.Application.Interfaces;
+using Linea.Domain.Entities.Auth;
+using Linea.Domain.Enums;
 using Linea.Infrastructure.Persistence;
 using Linea.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
 
 builder.Services
     .AddControllers()
@@ -35,6 +59,8 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IDashboardservice, DashboardService>();
 builder.Services.AddScoped<IGeneratedReportService, GeneratedReportService>();
 builder.Services.AddScoped<IInsightsService, InsightsService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 if (builder.Environment.IsDevelopment())
 {
@@ -43,6 +69,34 @@ if (builder.Environment.IsDevelopment())
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<LineaDbContext>();
+    if (!db.Users.Any())
+    {
+        db.Users.Add(new User
+        {
+            Username = "supervisor",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("supervisor123"),
+            Role = UserRole.Supervisor
+        });
+        db.Users.Add(new User
+        {
+            Username = "engineer",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("engineer123"),
+            Role = UserRole.Engineer
+        });
+        db.Users.Add(new User
+        {
+            Username = "operator",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("operator123"),
+            Role = UserRole.Operator
+        });
+        db.SaveChanges();
+    }
+}
+
+app.UseAuthentication();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -53,7 +107,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseCors("AllowAngularDev");
 app.UseAuthorization();
 app.MapControllers();

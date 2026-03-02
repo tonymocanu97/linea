@@ -1,7 +1,7 @@
 import { NgFor, NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { AlertsBadgeService, SettingsService } from '@shared/services';
+import { AlertsBadgeService, AuthService, SettingsService } from '@shared/services';
 import { Factory, LucideAngularModule } from 'lucide-angular';
 import { Subject, takeUntil } from 'rxjs';
 import { MANAGEMENT_NAV, OVERVIEW_NAV, PRODUCTION_NAV } from './constants';
@@ -17,7 +17,7 @@ import { NavItem } from './models';
 export class SidebarComponent implements OnInit, OnDestroy {
   overviewItems: NavItem[] = OVERVIEW_NAV;
   productionItems: NavItem[] = PRODUCTION_NAV;
-  managementItems: NavItem[] = MANAGEMENT_NAV;
+  managementItems: NavItem[] = [];
 
   alertsBadgeCount = 0;
   factory = Factory;
@@ -28,7 +28,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
   constructor(
     private alertsBadge: AlertsBadgeService,
     private settingsService: SettingsService,
-  ) {}
+    public authService: AuthService,
+  ) {
+    this.managementItems = MANAGEMENT_NAV.filter(
+      (item) => item.route !== '/users' || this.authService.isSupervisor(),
+    );
+  }
 
   ngOnInit(): void {
     this.alertsBadge.load();

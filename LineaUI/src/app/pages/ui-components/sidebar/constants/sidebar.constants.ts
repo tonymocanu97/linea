@@ -23,6 +23,6 @@ export const PRODUCTION_NAV: NavItem[] = [
 ];
 
 export const MANAGEMENT_NAV: NavItem[] = [
-  { label: 'Users', icon: Users, comingSoon: true },
+  { label: 'Users', icon: Users, route: '/users' },
   { label: 'Settings', icon: Settings, route: '/settings' },
 ];

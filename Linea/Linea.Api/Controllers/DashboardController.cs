@@ -3,12 +3,14 @@ using Linea.Application.DTOs.Downtime;
 using Linea.Application.DTOs.Equipment;
 using Linea.Application.Interfaces;
 using Linea.Domain.Entities.Dashboard;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Linea.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class DashboardController : ControllerBase
     {
         private readonly IDashboardservice _dashboardService;

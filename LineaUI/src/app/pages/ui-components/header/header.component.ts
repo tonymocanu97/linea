@@ -4,11 +4,13 @@ import {
   ChangeDetectorRef,
   Component,
   HostListener,
+  inject,
   NgZone,
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { SettingsService } from '@shared/services';
+import { Router } from '@angular/router';
+import { AuthService, SettingsService } from '@shared/services';
 import { formatDate, formatTime, getTargetTime } from '@shared/utils';
 import { Subject, takeUntil } from 'rxjs';
 import { SearchDialogComponent } from './components';
@@ -25,6 +27,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   currentDate = '';
   notificationsOpen = false;
   searchOpen = false;
+  userMenuOpen = false;
+  user = inject(AuthService).user;
 
   private destroy$ = new Subject<void>();
   private timeInterval?: number;
@@ -34,6 +38,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef,
     private settingsService: SettingsService,
+    private authService: AuthService,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -70,6 +76,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   openSearch(): void {
     this.searchOpen = true;
+  }
+
+  logout(): void {
+    this.userMenuOpen = false;
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
   ngOnDestroy(): void {

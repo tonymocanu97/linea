@@ -1,0 +1,54 @@
+<div class="flex min-h-screen items-center justify-center bg-background">
+  <div class="w-full max-w-sm rounded-xl border border-border bg-card p-8 shadow-lg">
+    <h1 class="mb-2 text-2xl font-bold text-foreground">Linea</h1>
+    <p class="mb-6 text-sm text-muted-foreground">Production monitoring platform</p>
+
+    <form (ngSubmit)="onSubmit()" class="space-y-4">
+      <div>
+        <label for="username" class="mb-1 block text-sm font-medium text-foreground"
+          >Username</label
+        >
+        <input
+          id="username"
+          type="text"
+          [(ngModel)]="username"
+          name="username"
+          autocomplete="username"
+          class="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholder="Enter username"
+        />
+      </div>
+
+      <div>
+        <label for="password" class="mb-1 block text-sm font-medium text-foreground"
+          >Password</label
+        >
+        <input
+          id="password"
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          autocomplete="current-password"
+          class="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholder="Enter password"
+        />
+      </div>
+
+      @if (error) {
+        <p class="text-sm text-destructive">{{ error }}</p>
+      }
+
+      <button
+        type="submit"
+        [disabled]="loading"
+        class="w-full rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground transition-colors disabled:opacity-50 cursor-pointer"
+      >
+        {{ loading ? 'Signing in...' : 'Sign in' }}
+      </button>
+    </form>
+
+    <p class="mt-4 text-xs text-muted-foreground">
+      Demo: supervisor/supervisor123, engineer/engineer123, operator/operator123
+    </p>
+  </div>
+</div>

@@ -3,5 +3,7 @@ export * from './alerts/alerts.component';
 export * from './analytics/analytics.component';
 export * from './dashboard/dashboard.component';
 export * from './equipment/equipment.component';
+export * from './login/login.component';
 export * from './reports/reports.component';
 export * from './settings/settings.component';
+export * from './users/users.component';

@@ -1,11 +1,13 @@
 using Linea.Application.DTOs.Insights;
 using Linea.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Linea.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class InsightsController : ControllerBase
     {
         private readonly IInsightsService _insightsService;

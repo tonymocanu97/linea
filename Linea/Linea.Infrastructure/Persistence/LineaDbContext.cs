@@ -1,3 +1,4 @@
+using Linea.Domain.Entities.Auth;
 using Linea.Domain.Entities.Equipment;
 using Linea.Domain.Entities.GeneratedReports;
 using Linea.Domain.Entities.Reports;
@@ -14,6 +15,7 @@ namespace Linea.Infrastructure.Persistence
         public DbSet<Downtime> Downtimes => Set<Downtime>();
         public DbSet<Equipment> Equipment => Set<Equipment>();
         public DbSet<GeneratedReport> GeneratedReports => Set<GeneratedReport>();
+        public DbSet<User> Users => Set<User>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -85,6 +87,15 @@ namespace Linea.Infrastructure.Persistence
                 b.Property(x => x.EquipmentName).HasMaxLength(100);
                 
                 b.HasIndex(x => x.CreatedAt);
+            });
+
+            modelBuilder.Entity<User>(b =>
+            {
+                b.ToTable("users");
+                b.HasKey(x => x.Id);
+                b.Property(x => x.Username).HasMaxLength(50);
+                b.Property(x => x.PasswordHash).HasMaxLength(100);
+                b.HasIndex(x => x.Username).IsUnique();
             });
         }
     }

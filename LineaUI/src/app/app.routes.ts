@@ -5,21 +5,26 @@ import {
   AnalyticsComponent,
   DashboardComponent,
   EquipmentComponent,
+  LoginComponent,
   ReportsComponent,
   SettingsComponent,
+  UsersComponent,
 } from '@pages';
+import { authGuard } from '@shared/guards/auth.guard';
+import { supervisorGuard } from '@shared/guards/supervisor.guard';
 
 export const routes: Routes = [
-  { path: '', component: DashboardComponent },
+  { path: 'login', component: LoginComponent },
 
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'analytics', component: AnalyticsComponent },
-  { path: 'ai-insights', component: AiInsightsComponent },
+  { path: '', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'analytics', component: AnalyticsComponent, canActivate: [authGuard] },
+  { path: 'ai-insights', component: AiInsightsComponent, canActivate: [authGuard] },
 
-  { path: 'equipment', component: EquipmentComponent },
-  { path: 'reports', component: ReportsComponent },
-  { path: 'alerts', component: AlertsComponent },
+  { path: 'equipment', component: EquipmentComponent, canActivate: [authGuard] },
+  { path: 'reports', component: ReportsComponent, canActivate: [authGuard] },
+  { path: 'alerts', component: AlertsComponent, canActivate: [authGuard] },
 
-  { path: 'users', component: DashboardComponent },
-  { path: 'settings', component: SettingsComponent },
+  { path: 'users', component: UsersComponent, canActivate: [supervisorGuard] },
+  { path: 'settings', component: SettingsComponent, canActivate: [authGuard] },
 ];

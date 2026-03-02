@@ -1,14 +1,16 @@
-﻿using Linea.Application.DTOs.Defect;
+using Linea.Application.DTOs.Defect;
 using Linea.Application.DTOs.Downtime;
 using Linea.Application.DTOs.Reports;
 using Linea.Application.Interfaces;
 using Linea.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Linea.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ReportsController : ControllerBase
     {
         private readonly IReportService _service;
