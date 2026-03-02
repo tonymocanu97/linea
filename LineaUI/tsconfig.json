@@ -5,6 +5,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
+      "@environments/*": ["src/environments/*"],
       "@/*": ["src/app/*"],
       "@pages": ["src/app/pages/index.ts"],
       "@pages/*": ["src/app/pages/*"],

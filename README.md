@@ -94,7 +94,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 4.  **Access the Application**:
     -   Open your browser and navigate to `http://localhost:4200`.
-    -   The Angular application is configured to proxy API requests from `/api` to the backend at `https://localhost:7130` (see `LineaUI/proxy.conf.json`).
+    -   The Angular application is configured to proxy API requests from `/api` to the backend at `http://localhost:5203` (see `LineaUI/proxy.conf.json`).
 
 ### Data Simulation
 
