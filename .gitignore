@@ -58,6 +58,7 @@ Thumbs.db
 # VS publish
 publish/
 Linea/Frontend/
+Linea/Linea.Api/wwwroot/
 *.Publish.xml
 
 # LocalDB, SQLite, DB files you don't want committed

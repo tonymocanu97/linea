@@ -11,9 +11,9 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var jwtKey = builder.Configuration["Jwt:Key"];
-var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-var jwtAudience = builder.Configuration["Jwt:Audience"];
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is required in appsettings.json");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "Linea";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "Linea";
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -72,6 +72,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<LineaDbContext>();
+    db.Database.Migrate();
     if (!db.Users.Any())
     {
         db.Users.Add(new User
@@ -113,4 +114,6 @@ app.UseStaticFiles();
 app.UseCors("AllowAngular");
 app.UseAuthorization();
 app.MapControllers();
+app.MapFallbackToFile("index.html");
+
 app.Run();
