@@ -58,6 +58,7 @@ namespace Linea.Infrastructure.Services
                 Always respond in English.
                 Be concise and data-driven. Use the provided context to answer questions.
                 If the context does not contain enough information, say so clearly.
+                Do NOT use markdown formatting in your responses: no ** for bold, no ## or # for headers, no bullet points with markdown. Use plain text only.
                 """;
         }
 
@@ -70,12 +71,12 @@ namespace Linea.Infrastructure.Services
             string? lineName)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("## Production context");
+            sb.AppendLine("Production context");
             sb.AppendLine($"Period: {from:yyyy-MM-dd} to {to:yyyy-MM-dd}");
             if (!string.IsNullOrWhiteSpace(lineName))
                 sb.AppendLine($"Line filter: {lineName}");
             sb.AppendLine();
-            sb.AppendLine("### Summary");
+            sb.AppendLine("Summary");
             sb.AppendLine($"- Total good units: {summary.TotalGood}");
             sb.AppendLine($"- Total scrap: {summary.TotalScrap}");
             sb.AppendLine($"- Scrap rate: {summary.ScrapRatePercent}%");
@@ -84,14 +85,14 @@ namespace Linea.Infrastructure.Services
             foreach (var d in summary.TopDefects)
                 sb.AppendLine($"  - {d.Type}: {d.Quantity}");
             sb.AppendLine();
-            sb.AppendLine("### Recent downtimes");
+            sb.AppendLine("Recent downtimes");
             foreach (var d in downtimes.Take(20))
             {
                 var end = d.EndTime.HasValue ? d.EndTime.Value.ToString("yyyy-MM-dd HH:mm") : "ongoing";
                 sb.AppendLine($"- {d.StartTime:yyyy-MM-dd HH:mm} - {end} | {d.Type} | {d.EquipmentName} | {d.LineName} | {d.Duration} min");
             }
             sb.AppendLine();
-            sb.AppendLine("### Equipment status");
+            sb.AppendLine("Equipment status");
             foreach (var e in equipmentStatus)
                 sb.AppendLine($"- {e.Name}: {e.Status} | Production: {e.ActualProductionRate}/{e.TargetProductionRate} | Efficiency: {e.EfficiencyPercentage}%");
             return sb.ToString();

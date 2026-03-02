@@ -10,7 +10,7 @@
           AI Insights <span class="text-primary">Assistant</span>
         </h2>
         <p class="text-muted-foreground">
-          Ask questions about production data in English. The AI uses your dashboard data to answer.
+          Ask questions about production data. The AI uses your dashboard data to answer.
         </p>
       </div>
 
@@ -74,7 +74,6 @@
         >
           <lucide-icon [name]="sparkles" class="mb-2 h-12 w-12"></lucide-icon>
           <p class="text-sm">Type a question or use a quick action above.</p>
-          <p class="mt-1 text-xs">All responses are in English.</p>
         </div>
 
         <div *ngFor="let msg of messages" class="mb-4">
@@ -110,7 +109,7 @@
           type="text"
           [(ngModel)]="inputText"
           (keydown.enter)="sendMessage()"
-          placeholder="Ask a question in English..."
+          placeholder="Ask a question..."
           class="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
         />
         <button
