@@ -59,6 +59,7 @@ Thumbs.db
 publish/
 Linea/Frontend/
 Linea/Linea.Api/wwwroot/
+Linea/Linea.Api/linea.db*
 scripts/
 *.Publish.xml
 

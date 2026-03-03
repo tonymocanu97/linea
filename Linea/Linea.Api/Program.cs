@@ -50,9 +50,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+var dbPath = Path.Combine(builder.Environment.ContentRootPath, "linea.db");
 builder.Services.AddDbContext<LineaDbContext>(options =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("LineaDb"));
+    options.UseSqlite($"Data Source={dbPath}");
 });
 
 builder.Services.AddScoped<IReportService, ReportService>();
@@ -73,6 +74,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<LineaDbContext>();
     db.Database.Migrate();
+
     if (!db.Users.Any())
     {
         db.Users.Add(new User
@@ -92,6 +94,25 @@ using (var scope = app.Services.CreateScope())
             Username = "operator",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword("operator123"),
             Role = UserRole.Operator
+        });
+        db.SaveChanges();
+    }
+
+    if (!db.Equipment.Any())
+    {
+        db.Equipment.Add(new Linea.Domain.Entities.Equipment.Equipment
+        {
+            Name = "Press Machine 1",
+            Status = "Running",
+            TargetProductionRate = 1000,
+            Notes = "Seed equipment for demo"
+        });
+        db.Equipment.Add(new Linea.Domain.Entities.Equipment.Equipment
+        {
+            Name = "Assembly Line A",
+            Status = "Running",
+            TargetProductionRate = 2000,
+            Notes = "Seed equipment for demo"
         });
         db.SaveChanges();
     }
