@@ -4,4 +4,5 @@ export * from './dashboard-api.service';
 export * from './insights-api.service';
 export * from './models';
 export * from './settings.service';
+export * from './telemetry-api.service';
 export * from './users-api.service';

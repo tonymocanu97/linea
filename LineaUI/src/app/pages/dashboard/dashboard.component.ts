@@ -2,7 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HeaderComponent, SidebarComponent } from '@components';
-import { DashboardApiService, DashboardSummary, EquipmentStatus } from '@shared/services';
+import {
+  DashboardApiService,
+  DashboardSummary,
+  EquipmentStatus,
+  TelemetryApiService,
+} from '@shared/services';
 import { toDateOnlyString } from '@shared/utils';
 import { Gauge, Package, PackageCheck, PackageMinus, Timer } from 'lucide-angular';
 import { catchError, forkJoin, of } from 'rxjs';
@@ -47,6 +52,8 @@ export class DashboardComponent {
 
   summary?: DashboardSummary;
   loading = false;
+  generating = false;
+  resetting = false;
   error?: string;
 
   productionChartData: any[] = [];
@@ -85,8 +92,37 @@ export class DashboardComponent {
     return this.summary?.totalDowntimeMinutes ?? 0;
   }
 
-  constructor(private api: DashboardApiService) {
+  constructor(
+    private api: DashboardApiService,
+    private telemetryApi: TelemetryApiService,
+  ) {
     this.refresh();
+  }
+
+  generateData(): void {
+    this.generating = true;
+    this.telemetryApi.generateData().subscribe({
+      next: () => {
+        this.generating = false;
+        this.refresh();
+      },
+      error: () => {
+        this.generating = false;
+      },
+    });
+  }
+
+  resetData(): void {
+    this.resetting = true;
+    this.telemetryApi.resetData().subscribe({
+      next: () => {
+        this.resetting = false;
+        this.refresh();
+      },
+      error: () => {
+        this.resetting = false;
+      },
+    });
   }
 
   refresh(): void {

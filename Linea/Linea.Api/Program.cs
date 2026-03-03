@@ -62,11 +62,7 @@ builder.Services.AddScoped<IGeneratedReportService, GeneratedReportService>();
 builder.Services.AddScoped<IInsightsService, InsightsService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
-
-if (builder.Environment.IsDevelopment())
-{
-    //builder.Services.AddHostedService<TelemetrySimulatorService>();
-}
+builder.Services.AddScoped<ITelemetryDataGenerator, TelemetryDataGeneratorService>();
 
 var app = builder.Build();
 
