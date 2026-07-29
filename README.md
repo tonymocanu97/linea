@@ -1,19 +1,17 @@
 # Linea
 
-[![Ask DeepWiki](https://devin.ai/assets/askdeepwiki.png)](https://deepwiki.com/tonymocanu97/linea)
-
 Industrial production line monitoring dashboard, originally built as the software side of my
 embedded systems master's dissertation. The thesis modeled an embedded telemetry pipeline for a
-factory production line in software; this app is the monitoring layer on top of it - tracking
-OEE, equipment status, defects, and downtime the way a real embedded telemetry stream would feed
-it, with a built-in generator standing in for the sensor data.
+factory production line in software.
 
 ![Linea dashboard preview](docs/linea-preview.png)
 
 ## Tech Stack
 
 **Backend:** ASP.NET Core (.NET 10) · Clean Architecture · EF Core · SQLite · JWT Auth · BCrypt
+<br>
 **Frontend:** Angular 21 · TypeScript · RxJS · Tailwind CSS · Lucide Icons
+<br>
 **AI:** OpenAI (gpt-4o-mini) for the natural-language insights assistant
 
 ## Features
