@@ -17,9 +17,6 @@ out/
 appsettings*.Local.json
 appsettings*.Secrets.json
 
-# EF Core Migrations
-Migrations/
-
 # npm / Angular
 node_modules/
 dist/
